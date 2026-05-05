@@ -2,7 +2,6 @@ services:
   - type: web
     name: giro-app
     runtime: static
-    plan: free
     buildCommand: ""
     staticPublishPath: .
     headers:
