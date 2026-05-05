@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: giro-app
+    runtime: static
+    plan: free
+    buildCommand: ""
+    staticPublishPath: .
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
