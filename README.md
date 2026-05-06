@@ -22,6 +22,10 @@ Abra o arquivo `index.html` no navegador. O app salva os dados no proprio navega
 - Abrir WhatsApp com o texto do anuncio.
 - Duplicar produto para cadastrar itens parecidos mais rapido.
 - Busca, filtro por status e ordenacao.
+- Dashboard com receita, lucro, margem e ROI por periodo.
+- Grafico de lucro dos ultimos 7 dias.
+- Ranking de produtos mais lucrativos.
+- Painel de status do giro e plataformas.
 - Resumo de investido, venda prevista, lucro previsto e lucro realizado.
 - Exportacao dos dados em JSON.
 - Exportacao de relatorio CSV.

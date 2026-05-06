@@ -251,6 +251,141 @@
       text-transform: none;
     }
 
+    .dashboard-panel {
+      margin-top: 18px;
+      padding: 18px;
+    }
+
+    .dashboard-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .dashboard-head h2 {
+      margin: 0;
+      font-size: 1.08rem;
+    }
+
+    .dashboard-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .dashboard-period {
+      width: 150px;
+      flex: 0 0 auto;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.75fr);
+      gap: 12px;
+    }
+
+    .dash-card {
+      min-width: 0;
+      padding: 14px;
+      border: 1px solid rgba(139, 255, 187, 0.08);
+      border-radius: var(--radius);
+      background: rgba(0, 0, 0, 0.12);
+    }
+
+    .dash-card h3 {
+      margin: 0 0 12px;
+      font-size: 0.92rem;
+    }
+
+    .dash-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .dash-metric {
+      min-height: 78px;
+      padding: 10px;
+      border: 1px solid rgba(139, 255, 187, 0.08);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .dash-metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .dash-metric strong {
+      display: block;
+      margin-top: 8px;
+      color: var(--green);
+      font-size: 1.12rem;
+      overflow-wrap: anywhere;
+    }
+
+    .chart {
+      height: 180px;
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      align-items: end;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(139, 255, 187, 0.08);
+    }
+
+    .bar-wrap {
+      min-width: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 7px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+
+    .bar {
+      width: 100%;
+      min-height: 8px;
+      border-radius: 6px 6px 2px 2px;
+      background: linear-gradient(180deg, var(--green), var(--green-2));
+      box-shadow: 0 10px 22px rgba(32, 232, 120, 0.18);
+    }
+
+    .dash-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .dash-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid rgba(139, 255, 187, 0.08);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 800;
+    }
+
+    .dash-row strong {
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+
     .toolbar {
       margin: 18px 0 12px;
       display: grid;
@@ -597,6 +732,7 @@
     @media (max-width: 920px) {
       .hero { grid-template-columns: 1fr; }
       .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .dashboard-grid, .dash-metrics { grid-template-columns: 1fr; }
       .toolbar { grid-template-columns: 1fr 1fr; }
       .toolbar .btn { width: 100%; }
       .numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -608,6 +744,8 @@
       .topbar-inner { width: min(100% - 20px, var(--max)); }
       .brand span { max-width: 44vw; }
       .top-actions .btn span { display: none; }
+      .dashboard-head { align-items: stretch; flex-direction: column; }
+      .dashboard-period { width: 100%; }
       .summary, .toolbar, .form-grid { grid-template-columns: 1fr; }
       .product-card { grid-template-columns: 1fr; }
       .photo { min-height: 210px; }
@@ -680,6 +818,42 @@
           <span class="chip">Ticket medio <strong id="avgSale">R$ 0,00</strong></span>
         </div>
       </aside>
+    </section>
+
+    <section class="panel dashboard-panel" aria-label="Dashboard de desempenho">
+      <div class="dashboard-head">
+        <div>
+          <h2>Dashboard</h2>
+          <p>Visao rapida de vendas, lucro, plataformas e andamento dos produtos.</p>
+        </div>
+        <select class="control dashboard-period" id="periodSelect">
+          <option value="7">7 dias</option>
+          <option value="30" selected>30 dias</option>
+          <option value="90">90 dias</option>
+          <option value="365">1 ano</option>
+          <option value="all">Tudo</option>
+        </select>
+      </div>
+      <div class="dashboard-grid">
+        <article class="dash-card">
+          <div class="dash-metrics">
+            <div class="dash-metric"><span>Receita</span><strong id="dashRevenue">R$ 0,00</strong></div>
+            <div class="dash-metric"><span>Lucro</span><strong id="dashProfit">R$ 0,00</strong></div>
+            <div class="dash-metric"><span>Margem</span><strong id="dashMargin">0%</strong></div>
+            <div class="dash-metric"><span>ROI</span><strong id="dashRoi">0%</strong></div>
+          </div>
+          <h3>Lucro dos ultimos 7 dias</h3>
+          <div class="chart" id="profitChart"></div>
+        </article>
+        <div class="dash-card">
+          <h3>Status do giro</h3>
+          <div class="dash-list" id="statusBoard"></div>
+          <h3 style="margin-top: 16px;">Top produtos</h3>
+          <div class="dash-list" id="topProducts"></div>
+          <h3 style="margin-top: 16px;">Plataformas</h3>
+          <div class="dash-list" id="platformBoard"></div>
+        </div>
+      </div>
     </section>
 
     <section class="toolbar" aria-label="Filtros">
@@ -918,6 +1092,7 @@
       productList: document.getElementById("productList"),
       emptyState: document.getElementById("emptyState"),
       searchInput: document.getElementById("searchInput"),
+      periodSelect: document.getElementById("periodSelect"),
       statusFilter: document.getElementById("statusFilter"),
       sortSelect: document.getElementById("sortSelect"),
       productModal: document.getElementById("productModal"),
@@ -1062,6 +1237,82 @@
       ].filter(Boolean).join("\n");
     }
 
+    function getPeriodProducts() {
+      if (els.periodSelect.value === "all") return products.filter(isSoldLike);
+      const limit = Date.now() - (Number(els.periodSelect.value) * day);
+      return products.filter((product) => isSoldLike(product) && Number(product.soldAt || product.createdAt) >= limit);
+    }
+
+    function renderRows(target, rows, emptyText) {
+      target.innerHTML = rows.length
+        ? rows.map((row) => `
+          <div class="dash-row">
+            <strong>${escapeHtml(row.label)}</strong>
+            <span>${escapeHtml(row.value)}</span>
+          </div>
+        `).join("")
+        : `<div class="dash-row"><strong>${emptyText}</strong><span>0</span></div>`;
+    }
+
+    function renderDashboard() {
+      const periodProducts = getPeriodProducts();
+      const revenue = periodProducts.reduce((sum, product) => sum + (Number(product.sale) * Number(product.stock || 1)), 0);
+      const profit = periodProducts.reduce((sum, product) => sum + getProfit(product), 0);
+      const cost = periodProducts.reduce((sum, product) => sum + getTotalCost(product), 0);
+      const margin = revenue ? Math.round((profit / revenue) * 100) : 0;
+      const roi = cost ? Math.round((profit / cost) * 100) : 0;
+
+      document.getElementById("dashRevenue").textContent = money.format(revenue);
+      document.getElementById("dashProfit").textContent = money.format(profit);
+      document.getElementById("dashMargin").textContent = `${margin}%`;
+      document.getElementById("dashRoi").textContent = `${roi}%`;
+
+      const days = Array.from({ length: 7 }, (_, index) => {
+        const date = new Date(Date.now() - ((6 - index) * day));
+        const key = date.toISOString().slice(0, 10);
+        return { key, label: date.toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", ""), total: 0 };
+      });
+      products.filter(isSoldLike).forEach((product) => {
+        const soldDate = new Date(Number(product.soldAt || product.createdAt));
+        const key = soldDate.toISOString().slice(0, 10);
+        const item = days.find((entry) => entry.key === key);
+        if (item) item.total += Math.max(0, getProfit(product));
+      });
+      const maxTotal = Math.max(1, ...days.map((entry) => entry.total));
+      document.getElementById("profitChart").innerHTML = days.map((entry) => {
+        const height = Math.max(6, Math.round((entry.total / maxTotal) * 130));
+        return `
+          <div class="bar-wrap" title="${money.format(entry.total)}">
+            <div class="bar" style="height: ${height}px"></div>
+            <span>${entry.label}</span>
+          </div>
+        `;
+      }).join("");
+
+      const statusOrder = ["stock", "reserved", "announced", "sold", "packing", "shipped", "delivered"];
+      const statusRows = statusOrder.map((status) => ({
+        label: getStatusLabel(status),
+        value: String(products.filter((product) => product.status === status).length)
+      }));
+      renderRows(document.getElementById("statusBoard"), statusRows, "Sem status");
+
+      const topRows = [...periodProducts]
+        .sort((a, b) => getProfit(b) - getProfit(a))
+        .slice(0, 5)
+        .map((product) => ({ label: product.name, value: money.format(getProfit(product)) }));
+      renderRows(document.getElementById("topProducts"), topRows, "Sem vendas no periodo");
+
+      const platformMap = products.reduce((map, product) => {
+        const key = product.platform || "Direto";
+        map[key] = (map[key] || 0) + 1;
+        return map;
+      }, {});
+      const platformRows = Object.entries(platformMap)
+        .sort((a, b) => b[1] - a[1])
+        .map(([label, total]) => ({ label, value: String(total) }));
+      renderRows(document.getElementById("platformBoard"), platformRows, "Sem plataformas");
+    }
+
     function getFilteredProducts() {
       const term = els.searchInput.value.trim().toLowerCase();
       const status = els.statusFilter.value;
@@ -1111,6 +1362,7 @@
 
     function renderProducts() {
       renderSummary();
+      renderDashboard();
       const list = getFilteredProducts();
       document.getElementById("listSubtitle").textContent = `${list.length} produto${list.length === 1 ? "" : "s"} na lista`;
       els.emptyState.classList.toggle("show", list.length === 0);
@@ -1422,6 +1674,7 @@
     els.imageInput.addEventListener("change", handleImage);
     els.productList.addEventListener("click", handleProductAction);
     els.searchInput.addEventListener("input", renderProducts);
+    els.periodSelect.addEventListener("change", renderProducts);
     els.statusFilter.addEventListener("change", renderProducts);
     els.sortSelect.addEventListener("change", renderProducts);
     els.productModal.addEventListener("click", (event) => {
