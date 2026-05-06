@@ -1843,8 +1843,7 @@
     }
 
     function getFacebookSearchUrl(query) {
-      const city = appSettings.facebookCity ? ` ${appSettings.facebookCity}` : "";
-      return `https://www.facebook.com/marketplace/search/?query=${encodeURIComponent(`${query}${city}`.trim())}`;
+      return `https://www.facebook.com/marketplace/search?query=${encodeURIComponent(String(query || "").trim())}`;
     }
 
     function makeReportText() {
