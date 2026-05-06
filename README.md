@@ -29,6 +29,7 @@ Abra o arquivo `index.html` no navegador. O app salva os dados no proprio navega
 - Painel de status do giro e plataformas.
 - Meta mensal com barra de progresso.
 - Produtos parados para identificar itens sem giro.
+- Marketplace conectado ao fluxo do Facebook: copia anuncio, abre criacao no Facebook Marketplace, marca como anunciado e salva link do anuncio.
 - Resumo de investido, venda prevista, lucro previsto e lucro realizado.
 - Exportacao dos dados em JSON.
 - Exportacao de relatorio CSV.

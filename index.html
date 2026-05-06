@@ -981,6 +981,7 @@
         <button class="nav-item" data-view-target="warranty"><span class="nav-icon">♢</span>Garantias <span class="badge">Novo</span></button>
         <button class="nav-item" data-view-target="reports"><span class="nav-icon">▥</span>Relatorios</button>
         <button class="nav-item" data-view-target="finance"><span class="nav-icon">▣</span>Financeiro <span class="badge soon">Em breve</span></button>
+        <button class="nav-item" data-view-target="marketplace"><span class="nav-icon">▢</span>Marketplace</button>
         <button class="nav-item" data-view-target="settings"><span class="nav-icon">⚙</span>Configuracoes</button>
         <button class="nav-item" data-view-target="support"><span class="nav-icon">?</span>Suporte</button>
       </nav>
@@ -1199,10 +1200,39 @@
       <div class="panel quick-panel"><h2>Financeiro</h2><p>Modulo preparado para contas a pagar, contas a receber e fluxo de caixa.</p></div>
     </section>
 
+    <section class="view" data-view="marketplace" hidden>
+      <div class="dashboard-head">
+        <div>
+          <h2>Marketplace</h2>
+          <p>Prepare anuncios e publique no Facebook Marketplace com poucos cliques.</p>
+        </div>
+        <div class="top-actions">
+          <button class="btn btn-primary" id="openFacebookBtn">Abrir Facebook Marketplace</button>
+        </div>
+      </div>
+      <div class="toolbar" aria-label="Filtros do marketplace">
+        <div class="field">
+          <label for="marketplaceSearch">Buscar</label>
+          <input class="control" id="marketplaceSearch" type="search" placeholder="Produto para anunciar..." />
+        </div>
+        <div class="field">
+          <label for="marketplaceMode">Modo</label>
+          <select class="control" id="marketplaceMode">
+            <option value="explore">Explorar estoque</option>
+            <option value="mine">Meus anuncios</option>
+          </select>
+        </div>
+        <button class="btn" id="copyAllAdsBtn">Copiar fila</button>
+      </div>
+      <div class="empty" id="marketplaceEmpty">Nenhum produto pronto para anunciar.</div>
+      <div class="product-list" id="marketplaceList"></div>
+    </section>
+
     <section class="view" data-view="settings" hidden>
       <div class="panel quick-panel">
         <h2>Configuracoes</h2>
         <div class="field"><label for="monthlyGoalInput">Meta mensal de venda</label><input class="control" id="monthlyGoalInput" type="number" min="0" step="100"></div>
+        <div class="field"><label for="facebookCityInput">Cidade padrao do Facebook Marketplace</label><input class="control" id="facebookCityInput" placeholder="Ex: Belo Horizonte, MG"></div>
         <button class="btn btn-primary" id="saveSettingsBtn">Salvar configuracoes</button>
       </div>
     </section>
@@ -1343,6 +1373,7 @@
       warranty: "Garantias",
       reports: "Relatorios",
       finance: "Financeiro",
+      marketplace: "Marketplace",
       settings: "Configuracoes",
       support: "Suporte"
     };
@@ -1450,7 +1481,12 @@
       notesInput: document.getElementById("notesInput"),
       imageInput: document.getElementById("imageInput"),
       importInput: document.getElementById("importInput"),
+      marketplaceList: document.getElementById("marketplaceList"),
+      marketplaceEmpty: document.getElementById("marketplaceEmpty"),
+      marketplaceSearch: document.getElementById("marketplaceSearch"),
+      marketplaceMode: document.getElementById("marketplaceMode"),
       monthlyGoalInput: document.getElementById("monthlyGoalInput"),
+      facebookCityInput: document.getElementById("facebookCityInput"),
       toast: document.getElementById("toast")
     };
 
@@ -1471,9 +1507,9 @@
 
     function loadSettings() {
       try {
-        return { monthlyGoal: 10000, ...(JSON.parse(localStorage.getItem(settingsKey) || "{}")) };
+        return { monthlyGoal: 10000, facebookCity: "", ...(JSON.parse(localStorage.getItem(settingsKey) || "{}")) };
       } catch {
-        return { monthlyGoal: 10000 };
+        return { monthlyGoal: 10000, facebookCity: "" };
       }
     }
 
@@ -1511,6 +1547,8 @@
         sku: product.sku || "",
         buyer: product.buyer || "",
         source: product.source || "",
+        facebookUrl: product.facebookUrl || "",
+        marketplaceSyncedAt: product.marketplaceSyncedAt || "",
         soldAt: product.soldAt || "",
         notes: product.notes || "",
         image: product.image || "",
@@ -1559,9 +1597,18 @@
         `Status: ${getStatusLabel(product.status)}`,
         product.platform ? `Plataforma: ${product.platform}` : "",
         product.sku ? `Codigo: ${product.sku}` : "",
+        appSettings.facebookCity ? `Local: ${appSettings.facebookCity}` : "",
         product.notes ? `Obs: ${product.notes}` : ""
       ].filter(Boolean);
       return lines.join("\n");
+    }
+
+    function getFacebookCreateUrl() {
+      return "https://www.facebook.com/marketplace/create/item";
+    }
+
+    function getFacebookMarketplaceUrl() {
+      return "https://www.facebook.com/marketplace/";
     }
 
     function makeReportText() {
@@ -1702,6 +1749,63 @@
       setText("calcResult", `Lucro: ${money.format(profit)} | Hora: ${money.format(hourly)}`);
     }
 
+    function getMarketplaceProducts() {
+      const term = (els.marketplaceSearch?.value || "").trim().toLowerCase();
+      const mode = els.marketplaceMode?.value || "explore";
+      return products
+        .filter((product) => {
+          const text = `${product.name} ${product.category} ${product.notes} ${product.platform}`.toLowerCase();
+          const matchesTerm = !term || text.includes(term);
+          const matchesMode = mode === "mine" ? Boolean(product.facebookUrl || product.marketplaceSyncedAt || product.status === "announced") : !isSoldLike(product);
+          return matchesTerm && matchesMode;
+        })
+        .sort((a, b) => Number(b.marketplaceSyncedAt || b.createdAt) - Number(a.marketplaceSyncedAt || a.createdAt));
+    }
+
+    function renderMarketplace() {
+      if (!els.marketplaceList) return;
+      const items = getMarketplaceProducts();
+      els.marketplaceEmpty.classList.toggle("show", items.length === 0);
+      els.marketplaceList.innerHTML = items.map((product) => {
+        const image = product.image
+          ? `<img src="${product.image}" alt="${escapeHtml(product.name)}">`
+          : `<div class="photo-fallback">${product.name.slice(0, 1).toUpperCase()}</div>`;
+        return `
+          <article class="product-card">
+            <div class="photo">${image}</div>
+            <div class="card-body">
+              <div class="card-main">
+                <div class="card-head">
+                  <div class="product-title">
+                    <h3>${escapeHtml(product.name)}</h3>
+                    <p>Facebook Marketplace • ${escapeHtml(product.category || "Produto")}</p>
+                  </div>
+                  <span class="status ${product.facebookUrl ? "reserved" : ""}">${product.facebookUrl ? "Link salvo" : "Pronto para anunciar"}</span>
+                </div>
+                <div class="numbers">
+                  <div class="number"><span>Preco</span><strong>${money.format(Number(product.sale))}</strong></div>
+                  <div class="number"><span>Lucro real</span><strong>${money.format(getProfit(product))}</strong></div>
+                  <div class="number"><span>Plataforma</span><strong>${escapeHtml(product.platform || "Facebook")}</strong></div>
+                  <div class="number"><span>Local</span><strong>${escapeHtml(appSettings.facebookCity || "Nao definido")}</strong></div>
+                </div>
+                ${product.facebookUrl ? `<div class="details"><div class="detail">Anuncio Facebook <strong>${escapeHtml(product.facebookUrl)}</strong></div></div>` : ""}
+              </div>
+              <div class="card-actions">
+                <div class="actions-left">
+                  <button class="btn" data-market-action="copy" data-id="${product.id}">Copiar texto</button>
+                  <button class="btn btn-primary" data-market-action="facebook" data-id="${product.id}">Criar no Facebook</button>
+                </div>
+                <div class="actions-right">
+                  <button class="btn" data-market-action="save-link" data-id="${product.id}">Salvar link</button>
+                  <button class="btn btn-amber" data-market-action="announced" data-id="${product.id}">Marcar anunciado</button>
+                </div>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
     function renderDashboard() {
       const periodProducts = getPeriodProducts();
       const revenue = periodProducts.reduce((sum, product) => sum + (Number(product.sale) * Number(product.stock || 1)), 0);
@@ -1824,6 +1928,7 @@
       const goalBar = document.getElementById("goalBar");
       if (goalBar) goalBar.style.width = `${percent}%`;
       if (els.monthlyGoalInput) els.monthlyGoalInput.value = goal || "";
+      if (els.facebookCityInput) els.facebookCityInput.value = appSettings.facebookCity || "";
     }
 
     function renderProducts() {
@@ -1832,6 +1937,7 @@
       renderStoppedProducts();
       renderModuleViews();
       renderCalculator();
+      renderMarketplace();
       const list = getFilteredProducts();
       document.getElementById("listSubtitle").textContent = `${list.length} produto${list.length === 1 ? "" : "s"} na lista`;
       els.emptyState.classList.toggle("show", list.length === 0);
@@ -1960,6 +2066,8 @@
         sku: els.skuInput.value.trim(),
         buyer: els.buyerInput.value.trim(),
         source: els.sourceInput.value.trim(),
+        facebookUrl: existing?.facebookUrl || "",
+        marketplaceSyncedAt: existing?.marketplaceSyncedAt || "",
         stock: Math.max(1, Number(els.stockInput.value || 1)),
         status: els.statusInput.value,
         notes: els.notesInput.value.trim(),
@@ -2056,6 +2164,53 @@
       }
     }
 
+    function handleMarketplaceAction(event) {
+      const button = event.target.closest("button[data-market-action]");
+      if (!button) return;
+      const product = products.find((item) => item.id === button.dataset.id);
+      if (!product) return;
+
+      if (button.dataset.marketAction === "copy") {
+        navigator.clipboard.writeText(makeAdText(product));
+        showToast("Texto do anuncio copiado");
+        return;
+      }
+
+      if (button.dataset.marketAction === "facebook") {
+        navigator.clipboard.writeText(makeAdText(product));
+        product.status = "announced";
+        product.platform = "Facebook Marketplace";
+        product.marketplaceSyncedAt = Date.now();
+        saveProducts();
+        renderProducts();
+        window.open(getFacebookCreateUrl(), "_blank", "noopener");
+        showToast("Texto copiado. Cole no Facebook.");
+        return;
+      }
+
+      if (button.dataset.marketAction === "announced") {
+        product.status = "announced";
+        product.platform = "Facebook Marketplace";
+        product.marketplaceSyncedAt = Date.now();
+        saveProducts();
+        renderProducts();
+        showToast("Marcado como anunciado");
+        return;
+      }
+
+      if (button.dataset.marketAction === "save-link") {
+        const link = prompt("Cole o link do anuncio no Facebook Marketplace:", product.facebookUrl || "");
+        if (link === null) return;
+        product.facebookUrl = link.trim();
+        product.status = "announced";
+        product.platform = "Facebook Marketplace";
+        product.marketplaceSyncedAt = Date.now();
+        saveProducts();
+        renderProducts();
+        showToast("Link do Facebook salvo");
+      }
+    }
+
     function exportData() {
       const blob = new Blob([JSON.stringify(products, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -2143,7 +2298,16 @@
     document.getElementById("importBtn").addEventListener("click", () => els.importInput.click());
     document.getElementById("csvBtn").addEventListener("click", exportCsv);
     document.getElementById("reportBtn").addEventListener("click", copyReport);
+    document.getElementById("openFacebookBtn").addEventListener("click", () => window.open(getFacebookMarketplaceUrl(), "_blank", "noopener"));
+    document.getElementById("copyAllAdsBtn").addEventListener("click", () => {
+      const text = getMarketplaceProducts().map(makeAdText).join("\n\n---\n\n");
+      navigator.clipboard.writeText(text || "Nenhum produto para anunciar");
+      showToast("Fila de anuncios copiada");
+    });
     els.importInput.addEventListener("change", importData);
+    els.marketplaceList.addEventListener("click", handleMarketplaceAction);
+    els.marketplaceSearch.addEventListener("input", renderMarketplace);
+    els.marketplaceMode.addEventListener("change", renderMarketplace);
     els.navItems.forEach((item) => item.addEventListener("click", () => switchView(item.dataset.viewTarget)));
     els.topPeriodSelect.addEventListener("change", () => {
       els.periodSelect.value = els.topPeriodSelect.value;
@@ -2152,6 +2316,7 @@
     document.querySelectorAll(".calc-input").forEach((input) => input.addEventListener("input", renderCalculator));
     document.getElementById("saveSettingsBtn").addEventListener("click", () => {
       appSettings.monthlyGoal = Number(els.monthlyGoalInput.value || 0);
+      appSettings.facebookCity = els.facebookCityInput.value.trim();
       saveSettings();
       renderProducts();
       showToast("Configuracoes salvas");
