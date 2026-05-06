@@ -864,6 +864,171 @@
       margin-top: 18px;
     }
 
+    .center-page {
+      width: min(720px, 100%);
+      margin: 24px auto 0;
+    }
+
+    .capital-hero {
+      min-height: 224px;
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .capital-hero span,
+    .capital-card span {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .capital-hero strong {
+      display: block;
+      color: #93aaa0;
+      font-size: clamp(3rem, 8vw, 4.6rem);
+      line-height: 1;
+    }
+
+    .capital-cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .capital-card {
+      min-height: 146px;
+      padding: 16px;
+    }
+
+    .capital-card strong {
+      display: block;
+      margin-top: 10px;
+      color: var(--text);
+      font-size: 1.34rem;
+    }
+
+    .capital-empty {
+      margin-top: 24px;
+      min-height: 226px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .calculator-shell {
+      width: min(430px, 100%);
+      margin: 42px auto 0;
+      display: grid;
+      gap: 18px;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .seg-btn {
+      min-height: 66px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.04);
+      font-weight: 900;
+    }
+
+    .seg-btn.active {
+      color: #06140d;
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .calc-box {
+      padding: 16px;
+    }
+
+    .margin-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin: 8px 0 14px;
+    }
+
+    .margin-btn {
+      min-height: 40px;
+      border-radius: var(--radius);
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--line);
+      font-weight: 900;
+    }
+
+    .margin-btn.active {
+      color: #06140d;
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .marketplace-tabs {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .market-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .market-card {
+      overflow: hidden;
+    }
+
+    .market-photo {
+      height: 250px;
+      display: grid;
+      place-items: center;
+      color: rgba(238, 251, 242, 0.86);
+      font-size: 3rem;
+      font-weight: 950;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(32,232,120,0.22), transparent 28%),
+        linear-gradient(145deg, #173823, #07140d);
+    }
+
+    .market-body {
+      padding: 13px;
+    }
+
+    .market-body h3 {
+      margin: 0;
+      font-size: 0.98rem;
+    }
+
+    .market-price {
+      display: block;
+      margin-top: 8px;
+      color: var(--green);
+      font-size: 1.14rem;
+      font-weight: 950;
+    }
+
+    .market-meta {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
     .module-card {
       padding: 18px;
       min-height: 130px;
@@ -930,7 +1095,7 @@
       .side-user { display: none; }
       .hero { grid-template-columns: 1fr; }
       .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .module-grid { grid-template-columns: 1fr; }
+      .module-grid, .capital-cards, .market-grid { grid-template-columns: 1fr; }
       .dashboard-grid, .dash-metrics { grid-template-columns: 1fr; }
       .toolbar { grid-template-columns: 1fr 1fr; }
       .toolbar .btn { width: 100%; }
@@ -1153,23 +1318,65 @@
     </section>
 
     <section class="view" data-view="capital" hidden>
-      <div class="module-grid">
-        <article class="panel module-card"><h2>Capital em estoque</h2><p id="capitalStock">R$ 0,00</p></article>
-        <article class="panel module-card"><h2>Capital realizado</h2><p id="capitalRealized">R$ 0,00</p></article>
-        <article class="panel module-card"><h2>Ticket medio</h2><p id="avgSale">R$ 0,00</p></article>
+      <div class="center-page">
+        <article class="panel capital-hero">
+          <span>Capital atual</span>
+          <strong id="capitalCurrent">R$ 0,00</strong>
+          <small id="capitalDelta">+R$ 0,00 (+0%)</small>
+          <small>Capital estavel</small>
+        </article>
+        <div class="capital-cards">
+          <article class="panel capital-card"><span>Capital inicial</span><strong id="capitalInitialView">R$ 0,00</strong><small>Configurado por voce</small></article>
+          <article class="panel capital-card"><span>Capital investido</span><strong id="capitalStock">R$ 0,00</strong><small id="capitalActiveSmall">Em 0 itens ativos</small></article>
+          <article class="panel capital-card"><span>Capital retornado</span><strong id="capitalRealized" style="color: var(--green);">R$ 0,00</strong><small id="capitalSalesSmall">De 0 vendas</small></article>
+          <article class="panel capital-card"><span>Tempo medio</span><strong id="capitalAvgDays">0 dias</strong><small>Em estoque</small></article>
+        </div>
+        <article class="panel capital-empty">
+          <div>
+            <h2>Defina seu Capital Inicial</h2>
+            <p style="color: var(--muted);">Informe quanto voce decidiu investir no seu negocio de revenda.</p>
+            <button class="btn btn-primary" data-view-jump="settings">Ir para Configuracoes</button>
+          </div>
+        </article>
       </div>
     </section>
 
     <section class="view" data-view="calculator" hidden>
-      <div class="panel quick-panel">
-        <h2>Calculadora de lucro</h2>
-        <div class="form-grid">
-          <div class="field"><label for="calcCost">Investido</label><input class="control calc-input" id="calcCost" type="number" value="2000"></div>
-          <div class="field"><label for="calcSale">Venda</label><input class="control calc-input" id="calcSale" type="number" value="2500"></div>
-          <div class="field"><label for="calcFees">Taxas/frete</label><input class="control calc-input" id="calcFees" type="number" value="80"></div>
-          <div class="field"><label for="calcHours">Horas</label><input class="control calc-input" id="calcHours" type="number" value="1"></div>
+      <div class="calculator-shell">
+        <div class="field">
+          <label for="calcType">Tipo de Calculadora</label>
+          <select class="control" id="calcType">
+            <option>Lojista/Revendedor</option>
+            <option>Uso pessoal</option>
+          </select>
         </div>
-        <div class="calc-result" id="calcResult">Lucro: R$ 420,00</div>
+        <div>
+          <label style="display:block; margin-bottom: 10px; font-weight: 900;">Modo de Operacao</label>
+          <div class="segmented">
+            <button class="seg-btn active" type="button" id="retailModeBtn">Varejo<br><small>(1 unidade)</small></button>
+            <button class="seg-btn" type="button" id="wholesaleModeBtn">Atacado<br><small>(em lote)</small></button>
+          </div>
+        </div>
+        <article class="panel calc-box">
+          <h2>Calcular</h2>
+          <div class="segmented">
+            <button class="seg-btn active" type="button">Com Custos</button>
+            <button class="seg-btn" type="button">Oportunidade</button>
+          </div>
+          <div class="field"><label for="calcCost">Valor de Compra</label><input class="control calc-input" id="calcCost" type="number" value="2000"></div>
+          <div class="field"><label for="calcFees">Frete/Transportadora/Motoboy</label><input class="control calc-input" id="calcFees" type="number" value="80"></div>
+          <div class="field"><label for="calcVolume">Volume mensal estimado</label><input class="control calc-input" id="calcVolume" type="number" value="1"></div>
+          <label style="display:block; margin-top: 10px; font-weight: 900;">Lucro Desejado (%)</label>
+          <div class="margin-row">
+            <button class="margin-btn active" type="button" data-margin="30">30%</button>
+            <button class="margin-btn" type="button" data-margin="50">50%</button>
+            <button class="margin-btn" type="button" data-margin="100">100%</button>
+            <button class="margin-btn" type="button" data-margin="custom">Outro</button>
+          </div>
+          <div class="field"><label for="calcSale">Valor de Revenda</label><input class="control calc-input" id="calcSale" type="number" value="2500"></div>
+          <div class="field"><label for="calcHours">Horas gastas</label><input class="control calc-input" id="calcHours" type="number" value="1"></div>
+          <div class="calc-result" id="calcResult">Lucro: R$ 420,00</div>
+        </article>
       </div>
     </section>
 
@@ -1204,7 +1411,7 @@
       <div class="dashboard-head">
         <div>
           <h2>Marketplace</h2>
-          <p>Prepare anuncios e publique no Facebook Marketplace com poucos cliques.</p>
+          <p>Explore oportunidades do mercado e pesquise direto no Facebook Marketplace.</p>
         </div>
         <div class="top-actions">
           <button class="btn btn-primary" id="openFacebookBtn">Abrir Facebook Marketplace</button>
@@ -1213,25 +1420,37 @@
       <div class="toolbar" aria-label="Filtros do marketplace">
         <div class="field">
           <label for="marketplaceSearch">Buscar</label>
-          <input class="control" id="marketplaceSearch" type="search" placeholder="Produto para anunciar..." />
+          <input class="control" id="marketplaceSearch" type="search" placeholder="iPhone, carro, monitor..." />
         </div>
         <div class="field">
-          <label for="marketplaceMode">Modo</label>
-          <select class="control" id="marketplaceMode">
-            <option value="explore">Explorar estoque</option>
-            <option value="mine">Meus anuncios</option>
+          <label for="marketplaceCategory">Categoria</label>
+          <select class="control" id="marketplaceCategory">
+            <option value="all">Todas</option>
+            <option value="Celular">Celulares</option>
+            <option value="Veiculo">Veiculos</option>
+            <option value="Informatica">Informatica</option>
+            <option value="Moda">Moda</option>
+            <option value="Casa">Casa</option>
           </select>
         </div>
-        <button class="btn" id="copyAllAdsBtn">Copiar fila</button>
+        <div class="field">
+          <label for="marketplaceMode">Origem</label>
+          <select class="control" id="marketplaceMode">
+            <option value="explore">Explorar mercado</option>
+            <option value="mine">Meus anuncios salvos</option>
+          </select>
+        </div>
+        <button class="btn" id="copyAllAdsBtn">Copiar buscas</button>
       </div>
-      <div class="empty" id="marketplaceEmpty">Nenhum produto pronto para anunciar.</div>
-      <div class="product-list" id="marketplaceList"></div>
+      <div class="empty" id="marketplaceEmpty">Nenhuma oportunidade encontrada.</div>
+      <div class="market-grid" id="marketplaceList"></div>
     </section>
 
     <section class="view" data-view="settings" hidden>
       <div class="panel quick-panel">
         <h2>Configuracoes</h2>
         <div class="field"><label for="monthlyGoalInput">Meta mensal de venda</label><input class="control" id="monthlyGoalInput" type="number" min="0" step="100"></div>
+        <div class="field"><label for="initialCapitalInput">Capital inicial</label><input class="control" id="initialCapitalInput" type="number" min="0" step="100"></div>
         <div class="field"><label for="facebookCityInput">Cidade padrao do Facebook Marketplace</label><input class="control" id="facebookCityInput" placeholder="Ex: Belo Horizonte, MG"></div>
         <button class="btn btn-primary" id="saveSettingsBtn">Salvar configuracoes</button>
       </div>
@@ -1362,6 +1581,16 @@
     const settingsKey = "giro-app-settings-v1";
     const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
     const day = 24 * 60 * 60 * 1000;
+    const marketplaceExamples = [
+      { title: "iPhone 12 - 128GB", price: 2200, category: "Celular", seller: "Claudio Victor", location: "Belford Roxo, RJ", condition: "Usado", query: "iPhone 12 128GB" },
+      { title: "iPhone 14 128GB", price: 2340, category: "Celular", seller: "Matheus Alves", location: "Sao Bernardo, SP", condition: "Usado", query: "iPhone 14 128GB" },
+      { title: "Gran Siena 2015 1.6", price: 14800, category: "Veiculo", seller: "Anunciante", location: "Mage, RJ", condition: "Usado", query: "Gran Siena 2015" },
+      { title: "Monitor Positivo", price: 180, category: "Informatica", seller: "Rian Vieira", location: "Joao Ferreira, AL", condition: "Usado", query: "monitor positivo" },
+      { title: "Camisa Brasil Nike", price: 120, category: "Moda", seller: "Loja local", location: "Belo Horizonte, MG", condition: "Novo", query: "camisa brasil nike" },
+      { title: "Sofa retratil 3 lugares", price: 650, category: "Casa", seller: "Particular", location: "Contagem, MG", condition: "Usado", query: "sofa retratil" },
+      { title: "iPhone 15 branco", price: 3650, category: "Celular", seller: "Revendedor", location: "Sao Paulo, SP", condition: "Usado", query: "iPhone 15 branco" },
+      { title: "Notebook Dell i5", price: 1600, category: "Informatica", seller: "Marketplace", location: "Betim, MG", condition: "Usado", query: "notebook dell i5" }
+    ];
     const viewTitles = {
       home: "Visao Geral",
       stock: "Estoque",
@@ -1485,7 +1714,9 @@
       marketplaceEmpty: document.getElementById("marketplaceEmpty"),
       marketplaceSearch: document.getElementById("marketplaceSearch"),
       marketplaceMode: document.getElementById("marketplaceMode"),
+      marketplaceCategory: document.getElementById("marketplaceCategory"),
       monthlyGoalInput: document.getElementById("monthlyGoalInput"),
+      initialCapitalInput: document.getElementById("initialCapitalInput"),
       facebookCityInput: document.getElementById("facebookCityInput"),
       toast: document.getElementById("toast")
     };
@@ -1507,9 +1738,9 @@
 
     function loadSettings() {
       try {
-        return { monthlyGoal: 10000, facebookCity: "", ...(JSON.parse(localStorage.getItem(settingsKey) || "{}")) };
+        return { monthlyGoal: 10000, initialCapital: 0, facebookCity: "", ...(JSON.parse(localStorage.getItem(settingsKey) || "{}")) };
       } catch {
-        return { monthlyGoal: 10000, facebookCity: "" };
+        return { monthlyGoal: 10000, initialCapital: 0, facebookCity: "" };
       }
     }
 
@@ -1611,6 +1842,11 @@
       return "https://www.facebook.com/marketplace/";
     }
 
+    function getFacebookSearchUrl(query) {
+      const city = appSettings.facebookCity ? ` ${appSettings.facebookCity}` : "";
+      return `https://www.facebook.com/marketplace/search/?query=${encodeURIComponent(`${query}${city}`.trim())}`;
+    }
+
     function makeReportText() {
       const openProducts = products.filter((product) => !isSoldLike(product));
       const soldProducts = products.filter(isSoldLike);
@@ -1698,10 +1934,23 @@
       const invested = openProducts.reduce((sum, product) => sum + getTotalCost(product), 0);
       const realized = soldProducts.reduce((sum, product) => sum + getProfit(product), 0);
       const avg = products.length ? products.reduce((sum, product) => sum + Number(product.sale), 0) / products.length : 0;
+      const initial = Number(appSettings.initialCapital || 0);
+      const current = initial + realized - invested;
+      const delta = current - initial;
+      const deltaPercent = initial ? (delta / initial) * 100 : 0;
+      const avgDays = openProducts.length
+        ? Math.round(openProducts.reduce((sum, product) => sum + Math.max(0, Math.floor((Date.now() - Number(product.createdAt)) / day)), 0) / openProducts.length)
+        : 0;
 
+      setText("capitalCurrent", money.format(current));
+      setText("capitalDelta", `${delta >= 0 ? "+" : ""}${money.format(delta)} (${deltaPercent >= 0 ? "+" : ""}${deltaPercent.toFixed(0)}%)`);
+      setText("capitalInitialView", money.format(initial));
       setText("capitalStock", money.format(invested));
       setText("capitalRealized", money.format(realized));
       setText("avgSale", money.format(avg));
+      setText("capitalActiveSmall", `Em ${openProducts.length} itens ativos`);
+      setText("capitalSalesSmall", `De ${soldProducts.length} vendas`);
+      setText("capitalAvgDays", `${avgDays} dias`);
 
       renderTable("salesTable", ["Produto", "Cliente", "Plataforma", "Venda", "Lucro", "Status"], soldProducts.map((product) => [
         `<strong>${escapeHtml(product.name)}</strong>`,
@@ -1744,28 +1993,57 @@
       const sale = Number(document.getElementById("calcSale")?.value || 0);
       const fees = Number(document.getElementById("calcFees")?.value || 0);
       const hours = Number(document.getElementById("calcHours")?.value || 0);
+      const volume = Math.max(1, Number(document.getElementById("calcVolume")?.value || 1));
       const profit = sale - cost - fees;
       const hourly = hours ? profit / hours : 0;
-      setText("calcResult", `Lucro: ${money.format(profit)} | Hora: ${money.format(hourly)}`);
+      const monthly = profit * volume;
+      setText("calcResult", `Lucro: ${money.format(profit)} | Mes: ${money.format(monthly)} | Hora: ${money.format(hourly)}`);
     }
 
     function getMarketplaceProducts() {
       const term = (els.marketplaceSearch?.value || "").trim().toLowerCase();
       const mode = els.marketplaceMode?.value || "explore";
-      return products
-        .filter((product) => {
-          const text = `${product.name} ${product.category} ${product.notes} ${product.platform}`.toLowerCase();
+      const category = els.marketplaceCategory?.value || "all";
+      if (mode === "mine") {
+        return products
+          .filter((product) => {
+            const text = `${product.name} ${product.category} ${product.notes} ${product.platform}`.toLowerCase();
+            const matchesTerm = !term || text.includes(term);
+            return matchesTerm && Boolean(product.facebookUrl || product.marketplaceSyncedAt || product.status === "announced");
+          })
+          .sort((a, b) => Number(b.marketplaceSyncedAt || b.createdAt) - Number(a.marketplaceSyncedAt || a.createdAt));
+      }
+      return marketplaceExamples
+        .filter((item) => {
+          const text = `${item.title} ${item.category} ${item.seller} ${item.location}`.toLowerCase();
           const matchesTerm = !term || text.includes(term);
-          const matchesMode = mode === "mine" ? Boolean(product.facebookUrl || product.marketplaceSyncedAt || product.status === "announced") : !isSoldLike(product);
-          return matchesTerm && matchesMode;
+          const matchesCategory = category === "all" || item.category === category;
+          return matchesTerm && matchesCategory;
         })
-        .sort((a, b) => Number(b.marketplaceSyncedAt || b.createdAt) - Number(a.marketplaceSyncedAt || a.createdAt));
+        .sort((a, b) => Number(b.price) - Number(a.price));
     }
 
     function renderMarketplace() {
       if (!els.marketplaceList) return;
       const items = getMarketplaceProducts();
       els.marketplaceEmpty.classList.toggle("show", items.length === 0);
+      if (els.marketplaceMode?.value === "explore") {
+        els.marketplaceList.innerHTML = items.map((item) => `
+          <article class="panel market-card">
+            <div class="market-photo">${escapeHtml(item.title.slice(0, 1))}</div>
+            <div class="market-body">
+              <span class="status">${escapeHtml(item.condition)}</span>
+              <h3>${escapeHtml(item.title)}</h3>
+              <strong class="market-price">${money.format(Number(item.price))}</strong>
+              <div class="market-meta">${escapeHtml(item.seller)}<br>${escapeHtml(item.location)}</div>
+              <div class="card-actions" style="padding: 12px 0 0;">
+                <button class="btn btn-primary" data-market-query="${escapeHtml(item.query)}">Buscar no Facebook</button>
+              </div>
+            </div>
+          </article>
+        `).join("");
+        return;
+      }
       els.marketplaceList.innerHTML = items.map((product) => {
         const image = product.image
           ? `<img src="${product.image}" alt="${escapeHtml(product.name)}">`
@@ -1928,6 +2206,7 @@
       const goalBar = document.getElementById("goalBar");
       if (goalBar) goalBar.style.width = `${percent}%`;
       if (els.monthlyGoalInput) els.monthlyGoalInput.value = goal || "";
+      if (els.initialCapitalInput) els.initialCapitalInput.value = Number(appSettings.initialCapital || 0) || "";
       if (els.facebookCityInput) els.facebookCityInput.value = appSettings.facebookCity || "";
     }
 
@@ -2165,6 +2444,11 @@
     }
 
     function handleMarketplaceAction(event) {
+      const queryButton = event.target.closest("button[data-market-query]");
+      if (queryButton) {
+        window.open(getFacebookSearchUrl(queryButton.dataset.marketQuery), "_blank", "noopener");
+        return;
+      }
       const button = event.target.closest("button[data-market-action]");
       if (!button) return;
       const product = products.find((item) => item.id === button.dataset.id);
@@ -2300,22 +2584,47 @@
     document.getElementById("reportBtn").addEventListener("click", copyReport);
     document.getElementById("openFacebookBtn").addEventListener("click", () => window.open(getFacebookMarketplaceUrl(), "_blank", "noopener"));
     document.getElementById("copyAllAdsBtn").addEventListener("click", () => {
-      const text = getMarketplaceProducts().map(makeAdText).join("\n\n---\n\n");
-      navigator.clipboard.writeText(text || "Nenhum produto para anunciar");
-      showToast("Fila de anuncios copiada");
+      const text = getMarketplaceProducts().map((item) => item.query || item.name || item.title).join("\n");
+      navigator.clipboard.writeText(text || "Nenhuma busca encontrada");
+      showToast("Buscas copiadas");
     });
     els.importInput.addEventListener("change", importData);
     els.marketplaceList.addEventListener("click", handleMarketplaceAction);
     els.marketplaceSearch.addEventListener("input", renderMarketplace);
     els.marketplaceMode.addEventListener("change", renderMarketplace);
+    els.marketplaceCategory.addEventListener("change", renderMarketplace);
     els.navItems.forEach((item) => item.addEventListener("click", () => switchView(item.dataset.viewTarget)));
+    document.querySelectorAll("[data-view-jump]").forEach((item) => item.addEventListener("click", () => switchView(item.dataset.viewJump)));
     els.topPeriodSelect.addEventListener("change", () => {
       els.periodSelect.value = els.topPeriodSelect.value;
       renderProducts();
     });
     document.querySelectorAll(".calc-input").forEach((input) => input.addEventListener("input", renderCalculator));
+    document.querySelectorAll(".margin-btn").forEach((button) => button.addEventListener("click", () => {
+      document.querySelectorAll(".margin-btn").forEach((item) => item.classList.remove("active"));
+      button.classList.add("active");
+      if (button.dataset.margin !== "custom") {
+        const cost = Number(document.getElementById("calcCost").value || 0);
+        const fees = Number(document.getElementById("calcFees").value || 0);
+        document.getElementById("calcSale").value = Math.round((cost + fees) * (1 + Number(button.dataset.margin) / 100));
+      }
+      renderCalculator();
+    }));
+    document.getElementById("retailModeBtn").addEventListener("click", () => {
+      document.getElementById("retailModeBtn").classList.add("active");
+      document.getElementById("wholesaleModeBtn").classList.remove("active");
+      document.getElementById("calcVolume").value = 1;
+      renderCalculator();
+    });
+    document.getElementById("wholesaleModeBtn").addEventListener("click", () => {
+      document.getElementById("wholesaleModeBtn").classList.add("active");
+      document.getElementById("retailModeBtn").classList.remove("active");
+      document.getElementById("calcVolume").value = 10;
+      renderCalculator();
+    });
     document.getElementById("saveSettingsBtn").addEventListener("click", () => {
       appSettings.monthlyGoal = Number(els.monthlyGoalInput.value || 0);
+      appSettings.initialCapital = Number(els.initialCapitalInput.value || 0);
       appSettings.facebookCity = els.facebookCityInput.value.trim();
       saveSettings();
       renderProducts();
