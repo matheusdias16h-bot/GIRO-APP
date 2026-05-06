@@ -11,9 +11,16 @@ Abra o arquivo `index.html` no navegador. O app salva os dados no proprio navega
 - Cadastro de produto com foto.
 - Edicao e exclusao.
 - Marcacao de produto como vendido.
+- Reserva de produto sem dar baixa como vendido.
+- Campo de gastos extras para calcular lucro real.
+- Campo de cliente/contato.
+- Margem de lucro por produto.
+- Copiar anuncio pronto para divulgar.
+- Abrir WhatsApp com o texto do anuncio.
 - Busca, filtro por status e ordenacao.
 - Resumo de investido, venda prevista, lucro previsto e lucro realizado.
 - Exportacao dos dados em JSON.
+- Importacao de backup JSON.
 
 ## Publicar no GitHub Pages
 

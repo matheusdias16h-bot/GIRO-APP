@@ -149,6 +149,12 @@
       border-color: rgba(255, 77, 99, 0.24);
     }
 
+    .btn-amber {
+      color: #1d1600;
+      background: linear-gradient(135deg, var(--amber), #ffe38a);
+      border-color: transparent;
+    }
+
     .hero {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 360px;
@@ -401,6 +407,12 @@
       border-color: rgba(255, 255, 255, 0.12);
     }
 
+    .status.reserved {
+      color: var(--amber);
+      background: rgba(255, 204, 77, 0.12);
+      border-color: rgba(255, 204, 77, 0.22);
+    }
+
     .numbers {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -429,6 +441,32 @@
     }
 
     .profit strong { color: var(--green); }
+
+    .details {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .detail {
+      min-height: 42px;
+      padding: 9px 10px;
+      border: 1px solid rgba(139, 255, 187, 0.08);
+      border-radius: var(--radius);
+      color: var(--muted);
+      background: rgba(0, 0, 0, 0.12);
+      font-size: 0.78rem;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .detail strong {
+      display: block;
+      margin-top: 3px;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
 
     .card-actions {
       min-height: 64px;
@@ -562,6 +600,7 @@
       .toolbar { grid-template-columns: 1fr 1fr; }
       .toolbar .btn { width: 100%; }
       .numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .details { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 640px) {
@@ -596,7 +635,9 @@
         </div>
         <div class="top-actions">
           <button class="icon-btn" id="exportBtn" title="Exportar dados">⇩</button>
+          <button class="icon-btn" id="importBtn" title="Importar backup">⇧</button>
           <button class="btn btn-primary" id="newProductBtn">＋ <span>Novo produto</span></button>
+          <input id="importInput" type="file" accept="application/json" hidden />
         </div>
       </div>
     </header>
@@ -649,6 +690,7 @@
         <select class="control" id="statusFilter">
           <option value="all">Todos</option>
           <option value="stock">Prontos para venda</option>
+          <option value="reserved">Reservados</option>
           <option value="sold">Vendidos</option>
         </select>
       </div>
@@ -708,6 +750,16 @@
         </div>
         <div class="form-grid">
           <div class="field">
+            <label for="extraCostInput">Gastos extras</label>
+            <input class="control" id="extraCostInput" type="number" min="0" step="0.01" placeholder="Frete, capa, taxa..." />
+          </div>
+          <div class="field">
+            <label for="buyerInput">Cliente / contato</label>
+            <input class="control" id="buyerInput" placeholder="Nome ou WhatsApp do cliente" />
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
             <label for="stockInput">Quantidade</label>
             <input class="control" id="stockInput" type="number" min="1" step="1" value="1" required />
           </div>
@@ -715,6 +767,7 @@
             <label for="statusInput">Status</label>
             <select class="control" id="statusInput">
               <option value="stock">Pronto para venda</option>
+              <option value="reserved">Reservado</option>
               <option value="sold">Vendido</option>
             </select>
           </div>
@@ -749,9 +802,12 @@
         name: "iPhone 15",
         category: "Celular",
         cost: 2450,
+        extraCost: 0,
         sale: 2950,
         stock: 1,
         status: "stock",
+        buyer: "",
+        soldAt: "",
         notes: "128GB, seminovo, pronto para anunciar.",
         image: "",
         createdAt: Date.now() - (5 * day)
@@ -761,9 +817,12 @@
         name: "iPhone 14",
         category: "Celular",
         cost: 2000,
+        extraCost: 40,
         sale: 2350,
         stock: 1,
         status: "stock",
+        buyer: "",
+        soldAt: "",
         notes: "Aparelho revisado com carregador.",
         image: "",
         createdAt: Date.now() - (8 * day)
@@ -773,9 +832,12 @@
         name: "Samsung S23",
         category: "Celular",
         cost: 1750,
+        extraCost: 30,
         sale: 2190,
         stock: 1,
         status: "sold",
+        buyer: "Cliente Pix",
+        soldAt: Date.now() - (2 * day),
         notes: "Venda finalizada no Pix.",
         image: "",
         createdAt: Date.now() - (12 * day)
@@ -799,11 +861,14 @@
       nameInput: document.getElementById("nameInput"),
       categoryInput: document.getElementById("categoryInput"),
       costInput: document.getElementById("costInput"),
+      extraCostInput: document.getElementById("extraCostInput"),
       saleInput: document.getElementById("saleInput"),
+      buyerInput: document.getElementById("buyerInput"),
       stockInput: document.getElementById("stockInput"),
       statusInput: document.getElementById("statusInput"),
       notesInput: document.getElementById("notesInput"),
       imageInput: document.getElementById("imageInput"),
+      importInput: document.getElementById("importInput"),
       toast: document.getElementById("toast")
     };
 
@@ -829,8 +894,55 @@
       showToast.timer = window.setTimeout(() => els.toast.classList.remove("show"), 1800);
     }
 
+    function normalizeProduct(product) {
+      return {
+        ...product,
+        id: product.id || crypto.randomUUID(),
+        name: product.name || "Produto sem nome",
+        category: product.category || "Produto",
+        cost: Number(product.cost || 0),
+        extraCost: Number(product.extraCost || 0),
+        sale: Number(product.sale || 0),
+        stock: Math.max(1, Number(product.stock || 1)),
+        status: ["stock", "reserved", "sold"].includes(product.status) ? product.status : "stock",
+        buyer: product.buyer || "",
+        soldAt: product.soldAt || "",
+        notes: product.notes || "",
+        image: product.image || "",
+        createdAt: product.createdAt || Date.now()
+      };
+    }
+
+    products = products.map(normalizeProduct);
+
+    function getTotalCost(product) {
+      return (Number(product.cost) + Number(product.extraCost || 0)) * Number(product.stock || 1);
+    }
+
     function getProfit(product) {
-      return (Number(product.sale) - Number(product.cost)) * Number(product.stock || 1);
+      return (Number(product.sale) * Number(product.stock || 1)) - getTotalCost(product);
+    }
+
+    function getMargin(product) {
+      const totalSale = Number(product.sale) * Number(product.stock || 1);
+      return totalSale ? Math.round((getProfit(product) / totalSale) * 100) : 0;
+    }
+
+    function getStatusLabel(status) {
+      if (status === "sold") return "Vendido";
+      if (status === "reserved") return "Reservado";
+      return "Pronto para venda";
+    }
+
+    function makeAdText(product) {
+      const lines = [
+        `${product.name}`,
+        `Categoria: ${product.category || "Produto"}`,
+        `Valor: ${money.format(Number(product.sale))}`,
+        `Status: ${getStatusLabel(product.status)}`,
+        product.notes ? `Obs: ${product.notes}` : ""
+      ].filter(Boolean);
+      return lines.join("\n");
     }
 
     function getFilteredProducts() {
@@ -861,9 +973,10 @@
     }
 
     function renderSummary() {
-      const stockProducts = products.filter((product) => product.status === "stock");
+      const stockProducts = products.filter((product) => product.status !== "sold");
       const soldProducts = products.filter((product) => product.status === "sold");
-      const invested = stockProducts.reduce((sum, product) => sum + Number(product.cost) * Number(product.stock || 1), 0);
+      const reservedProducts = products.filter((product) => product.status === "reserved");
+      const invested = stockProducts.reduce((sum, product) => sum + getTotalCost(product), 0);
       const sale = stockProducts.reduce((sum, product) => sum + Number(product.sale) * Number(product.stock || 1), 0);
       const profit = stockProducts.reduce((sum, product) => sum + getProfit(product), 0);
       const realized = soldProducts.reduce((sum, product) => sum + getProfit(product), 0);
@@ -873,7 +986,7 @@
       document.getElementById("totalSale").textContent = money.format(sale);
       document.getElementById("totalProfit").textContent = money.format(profit);
       document.getElementById("realizedProfit").textContent = money.format(realized);
-      document.getElementById("countStock").textContent = stockProducts.length;
+      document.getElementById("countStock").textContent = `${stockProducts.length} (${reservedProducts.length} res.)`;
       document.getElementById("countSold").textContent = soldProducts.length;
       document.getElementById("countItems").textContent = products.length;
       document.getElementById("avgSale").textContent = money.format(avg);
@@ -887,6 +1000,7 @@
       els.productList.innerHTML = list.map((product) => {
         const profit = getProfit(product);
         const isSold = product.status === "sold";
+        const isReserved = product.status === "reserved";
         const image = product.image
           ? `<img src="${product.image}" alt="${product.name}">`
           : `<div class="photo-fallback">${product.name.slice(0, 1).toUpperCase()}</div>`;
@@ -900,21 +1014,31 @@
                     <h3>${escapeHtml(product.name)}</h3>
                     <p>${escapeHtml(product.category || "Produto")} • ${daysAgo(product.createdAt)}</p>
                   </div>
-                  <span class="status ${isSold ? "sold" : ""}">${isSold ? "Vendido" : "Pronto para venda"}</span>
+                  <span class="status ${isSold ? "sold" : isReserved ? "reserved" : ""}">${getStatusLabel(product.status)}</span>
                 </div>
                 <div class="numbers">
-                  <div class="number"><span>Investido</span><strong>${money.format(Number(product.cost))}</strong></div>
+                  <div class="number"><span>Investido</span><strong>${money.format(getTotalCost(product))}</strong></div>
                   <div class="number"><span>Venda</span><strong>${money.format(Number(product.sale))}</strong></div>
                   <div class="number"><span>Estoque</span><strong>${Number(product.stock || 1)}</strong></div>
                   <div class="number profit"><span>Lucro previsto</span><strong>${money.format(profit)}</strong></div>
+                </div>
+                <div class="details">
+                  <div class="detail">Margem <strong>${getMargin(product)}%</strong></div>
+                  <div class="detail">Gastos extras <strong>${money.format(Number(product.extraCost || 0))}</strong></div>
+                  <div class="detail">Cliente <strong>${escapeHtml(product.buyer || "Sem contato")}</strong></div>
                 </div>
               </div>
               <div class="card-actions">
                 <div class="actions-left">
                   <button class="icon-btn btn-danger" data-action="delete" data-id="${product.id}" title="Excluir">⌫</button>
                   <button class="btn" data-action="edit" data-id="${product.id}">✎ Editar</button>
+                  <button class="btn" data-action="copy" data-id="${product.id}">Copiar anuncio</button>
                 </div>
                 <div class="actions-right">
+                  <button class="btn" data-action="whatsapp" data-id="${product.id}">WhatsApp</button>
+                  <button class="btn btn-amber" data-action="reserve" data-id="${product.id}">
+                    ${isReserved ? "Liberar reserva" : "Reservar"}
+                  </button>
                   <button class="btn ${isSold ? "" : "btn-primary"}" data-action="toggle" data-id="${product.id}">
                     ${isSold ? "↩ Voltar para estoque" : "✓ Marcar como vendido"}
                   </button>
@@ -943,7 +1067,9 @@
       els.nameInput.value = product?.name || "";
       els.categoryInput.value = product?.category || "Celular";
       els.costInput.value = product?.cost || "";
+      els.extraCostInput.value = product?.extraCost || "";
       els.saleInput.value = product?.sale || "";
+      els.buyerInput.value = product?.buyer || "";
       els.stockInput.value = product?.stock || 1;
       els.statusInput.value = product?.status || "stock";
       els.notesInput.value = product?.notes || "";
@@ -976,11 +1102,14 @@
         name: els.nameInput.value.trim() || "Produto sem nome",
         category: els.categoryInput.value.trim() || "Produto",
         cost: Number(els.costInput.value || 0),
+        extraCost: Number(els.extraCostInput.value || 0),
         sale: Number(els.saleInput.value || 0),
+        buyer: els.buyerInput.value.trim(),
         stock: Math.max(1, Number(els.stockInput.value || 1)),
         status: els.statusInput.value,
         notes: els.notesInput.value.trim(),
         image: selectedImage,
+        soldAt: els.statusInput.value === "sold" ? (existing?.soldAt || Date.now()) : "",
         createdAt: existing?.createdAt || Date.now()
       };
 
@@ -1019,9 +1148,31 @@
 
       if (button.dataset.action === "toggle") {
         product.status = product.status === "sold" ? "stock" : "sold";
+        product.soldAt = product.status === "sold" ? Date.now() : "";
         saveProducts();
         renderProducts();
         showToast(product.status === "sold" ? "Marcado como vendido" : "Voltou para estoque");
+        return;
+      }
+
+      if (button.dataset.action === "reserve") {
+        product.status = product.status === "reserved" ? "stock" : "reserved";
+        product.soldAt = "";
+        saveProducts();
+        renderProducts();
+        showToast(product.status === "reserved" ? "Produto reservado" : "Reserva liberada");
+        return;
+      }
+
+      if (button.dataset.action === "copy") {
+        navigator.clipboard.writeText(makeAdText(product));
+        showToast("Anuncio copiado");
+        return;
+      }
+
+      if (button.dataset.action === "whatsapp") {
+        const url = `https://wa.me/?text=${encodeURIComponent(makeAdText(product))}`;
+        window.open(url, "_blank", "noopener");
         return;
       }
 
@@ -1043,10 +1194,33 @@
       URL.revokeObjectURL(url);
     }
 
+    function importData(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(String(reader.result));
+          if (!Array.isArray(data)) throw new Error("Formato invalido");
+          products = data.map(normalizeProduct);
+          saveProducts();
+          renderProducts();
+          showToast("Backup importado");
+        } catch {
+          showToast("Arquivo invalido");
+        } finally {
+          els.importInput.value = "";
+        }
+      };
+      reader.readAsText(file);
+    }
+
     document.getElementById("newProductBtn").addEventListener("click", () => openModal());
     document.getElementById("closeModalBtn").addEventListener("click", closeModal);
     document.getElementById("cancelBtn").addEventListener("click", closeModal);
     document.getElementById("exportBtn").addEventListener("click", exportData);
+    document.getElementById("importBtn").addEventListener("click", () => els.importInput.click());
+    els.importInput.addEventListener("change", importData);
     document.getElementById("seedBtn").addEventListener("click", () => {
       products = fallbackProducts.map((product) => ({ ...product, id: crypto.randomUUID() }));
       saveProducts();
