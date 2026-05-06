@@ -23,9 +23,12 @@ Abra o arquivo `index.html` no navegador. O app salva os dados no proprio navega
 - Duplicar produto para cadastrar itens parecidos mais rapido.
 - Busca, filtro por status e ordenacao.
 - Dashboard com receita, lucro, margem e ROI por periodo.
+- Interface com menu lateral estilo app: Inicio, Estoque, Vendas, Capital, Calculadora, Fornecedores, Clientes, Garantias, Relatorios e Configuracoes.
 - Grafico de lucro dos ultimos 7 dias.
 - Ranking de produtos mais lucrativos.
 - Painel de status do giro e plataformas.
+- Meta mensal com barra de progresso.
+- Produtos parados para identificar itens sem giro.
 - Resumo de investido, venda prevista, lucro previsto e lucro realizado.
 - Exportacao dos dados em JSON.
 - Exportacao de relatorio CSV.

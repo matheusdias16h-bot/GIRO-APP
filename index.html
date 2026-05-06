@@ -43,30 +43,156 @@
     button { border: 0; cursor: pointer; }
     img { display: block; max-width: 100%; }
 
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 254px minmax(0, 1fr);
+      background: #041009;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--line);
+      background: rgba(13, 32, 22, 0.96);
+    }
+
+    .side-brand {
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--line);
+      font-weight: 950;
+    }
+
+    .side-brand .mark {
+      width: 34px;
+      height: 34px;
+      font-size: 0.84rem;
+    }
+
+    .side-nav {
+      flex: 1;
+      display: grid;
+      align-content: start;
+      gap: 4px;
+      padding: 8px;
+      overflow: auto;
+    }
+
+    .nav-item {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 12px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      color: var(--muted);
+      background: transparent;
+      text-align: left;
+      font-weight: 800;
+    }
+
+    .nav-item.active {
+      color: var(--green);
+      background: rgba(32, 232, 120, 0.12);
+      border-color: rgba(32, 232, 120, 0.12);
+    }
+
+    .nav-icon {
+      width: 20px;
+      text-align: center;
+      color: inherit;
+      opacity: 0.9;
+    }
+
+    .badge {
+      margin-left: auto;
+      padding: 2px 7px;
+      border-radius: 999px;
+      color: #06140d;
+      background: var(--green);
+      font-size: 0.64rem;
+      font-weight: 950;
+    }
+
+    .soon {
+      color: var(--green);
+      background: rgba(32, 232, 120, 0.14);
+    }
+
+    .side-user {
+      margin: 10px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #06140d;
+      background: var(--green);
+      font-weight: 950;
+    }
+
     .app {
-      width: min(var(--max), calc(100% - 28px));
-      margin: 0 auto;
-      padding: 18px 0 34px;
+      width: 100%;
+      min-width: 0;
+      margin: 0;
+      padding: 0 24px 34px;
     }
 
     .topbar {
       position: sticky;
       top: 0;
       z-index: 30;
-      margin: 0 calc((100vw - min(var(--max), calc(100% - 28px))) / -2);
-      padding: 12px max(14px, calc((100vw - var(--max)) / 2));
+      margin: 0 -24px;
+      padding: 0 24px;
       background: rgba(6, 20, 13, 0.82);
       border-bottom: 1px solid var(--line);
       backdrop-filter: blur(18px);
     }
 
     .topbar-inner {
-      width: min(var(--max), calc(100% - 28px));
+      min-height: 56px;
+      width: 100%;
       margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+    }
+
+    .page-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .page-heading h1 {
+      margin: 0;
+      font-size: 1.28rem;
+      line-height: 1;
+    }
+
+    .page-heading .control {
+      width: 110px;
+      min-height: 36px;
     }
 
     .brand {
@@ -157,17 +283,19 @@
 
     .hero {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 360px;
+      grid-template-columns: 1fr;
       gap: 18px;
       align-items: stretch;
-      margin-top: 18px;
+      margin-top: 24px;
     }
 
     .summary {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 10px;
     }
+
+    .view[hidden] { display: none !important; }
 
     .stat, .panel, .product-card, .modal-card {
       border: 1px solid var(--line);
@@ -729,9 +857,80 @@
       opacity: 1;
     }
 
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .module-card {
+      padding: 18px;
+      min-height: 130px;
+    }
+
+    .module-card h2 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .module-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .calc-result {
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: var(--radius);
+      color: var(--green);
+      background: rgba(32, 232, 120, 0.1);
+      font-size: 1.4rem;
+      font-weight: 950;
+    }
+
+    .table-panel {
+      overflow: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+    }
+
+    .data-table th, .data-table td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(139, 255, 187, 0.08);
+      text-align: left;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .data-table th {
+      color: var(--text);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .data-table strong { color: var(--text); }
+
     @media (max-width: 920px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+      .side-nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-height: none;
+      }
+      .side-user { display: none; }
       .hero { grid-template-columns: 1fr; }
       .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .module-grid { grid-template-columns: 1fr; }
       .dashboard-grid, .dash-metrics { grid-template-columns: 1fr; }
       .toolbar { grid-template-columns: 1fr 1fr; }
       .toolbar .btn { width: 100%; }
@@ -740,10 +939,14 @@
     }
 
     @media (max-width: 640px) {
-      .app { width: min(100% - 20px, var(--max)); }
-      .topbar-inner { width: min(100% - 20px, var(--max)); }
+      .app { padding: 0 10px 24px; }
+      .topbar { margin: 0 -10px; padding: 0 10px; }
+      .topbar-inner { width: 100%; }
+      .side-nav { grid-template-columns: 1fr; }
       .brand span { max-width: 44vw; }
       .top-actions .btn span { display: none; }
+      .top-actions { flex-wrap: wrap; justify-content: flex-end; }
+      .page-heading { align-items: flex-start; flex-direction: column; }
       .dashboard-head { align-items: stretch; flex-direction: column; }
       .dashboard-period { width: 100%; }
       .summary, .toolbar, .form-grid { grid-template-columns: 1fr; }
@@ -761,15 +964,46 @@
   </style>
 </head>
 <body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="side-brand">
+        <div class="mark">G</div>
+        <strong>Giro App™</strong>
+      </div>
+      <nav class="side-nav" aria-label="Menu principal">
+        <button class="nav-item active" data-view-target="home"><span class="nav-icon">▦</span>Inicio</button>
+        <button class="nav-item" data-view-target="stock"><span class="nav-icon">□</span>Estoque</button>
+        <button class="nav-item" data-view-target="sales"><span class="nav-icon">$</span>Vendas</button>
+        <button class="nav-item" data-view-target="capital"><span class="nav-icon">▣</span>Meu Capital</button>
+        <button class="nav-item" data-view-target="calculator"><span class="nav-icon">≡</span>Calculadora</button>
+        <button class="nav-item" data-view-target="suppliers"><span class="nav-icon">▤</span>Fornecedores</button>
+        <button class="nav-item" data-view-target="clients"><span class="nav-icon">◌</span>Clientes</button>
+        <button class="nav-item" data-view-target="warranty"><span class="nav-icon">♢</span>Garantias <span class="badge">Novo</span></button>
+        <button class="nav-item" data-view-target="reports"><span class="nav-icon">▥</span>Relatorios</button>
+        <button class="nav-item" data-view-target="finance"><span class="nav-icon">▣</span>Financeiro <span class="badge soon">Em breve</span></button>
+        <button class="nav-item" data-view-target="settings"><span class="nav-icon">⚙</span>Configuracoes</button>
+        <button class="nav-item" data-view-target="support"><span class="nav-icon">?</span>Suporte</button>
+      </nav>
+      <div class="side-user">
+        <div class="avatar">MD</div>
+        <div>
+          <strong style="color: var(--text);">Matheus Dias</strong><br>
+          <span>Plano FREE</span>
+        </div>
+      </div>
+    </aside>
   <main class="app">
     <header class="topbar">
       <div class="topbar-inner">
-        <div class="brand">
-          <div class="mark">99</div>
-          <div>
-            <h1>GIRO APP</h1>
-            <span>Estoque, lucro e venda em um painel</span>
-          </div>
+        <div class="page-heading">
+          <h1 id="pageTitle">Visao Geral</h1>
+          <select class="control" id="topPeriodSelect" title="Periodo">
+            <option value="7">Semana</option>
+            <option value="30" selected>Mes</option>
+            <option value="90">Trimestre</option>
+            <option value="365">Ano</option>
+            <option value="all">Tudo</option>
+          </select>
         </div>
         <div class="top-actions">
           <button class="icon-btn" id="exportBtn" title="Exportar dados">⇩</button>
@@ -782,17 +1016,17 @@
       </div>
     </header>
 
-    <section class="hero" aria-label="Resumo financeiro">
+    <section class="hero view" data-view="home" aria-label="Resumo financeiro">
       <div class="summary">
         <article class="stat">
-          <span>Investido</span>
-          <strong id="totalInvested">R$ 0,00</strong>
-          <small>Valor parado em estoque</small>
+          <span>Total vendido</span>
+          <strong id="dashTotalSold">R$ 0,00</strong>
+          <small id="dashSoldCount">Venda realizada 0 itens</small>
         </article>
         <article class="stat">
-          <span>Venda prevista</span>
-          <strong id="totalSale">R$ 0,00</strong>
-          <small>Produtos prontos para venda</small>
+          <span>Lucro bruto realizado</span>
+          <strong id="realizedProfit">R$ 0,00</strong>
+          <small id="dashRoiSmall">ROI +0,00%</small>
         </article>
         <article class="stat">
           <span>Lucro previsto</span>
@@ -800,27 +1034,19 @@
           <small>Margem antes da venda</small>
         </article>
         <article class="stat">
-          <span>Lucro realizado</span>
-          <strong id="realizedProfit">R$ 0,00</strong>
-          <small>Produtos ja vendidos</small>
+          <span>A receber (prazo)</span>
+          <strong id="receivableTotal" style="color: var(--amber);">R$ 0,00</strong>
+          <small>Itens vendidos nao entregues</small>
+        </article>
+        <article class="stat">
+          <span>Ativos</span>
+          <strong id="activeItems">0 Itens</strong>
+          <small>Produtos em estoque</small>
         </article>
       </div>
-
-      <aside class="panel quick-panel">
-        <div>
-          <h2>Controle rapido</h2>
-          <p>Cadastre o produto, coloque quanto pagou, por quanto quer vender e acompanhe o lucro automaticamente.</p>
-        </div>
-        <div class="mini-grid">
-          <span class="chip">Em estoque <strong id="countStock">0</strong></span>
-          <span class="chip">Vendidos <strong id="countSold">0</strong></span>
-          <span class="chip">Itens total <strong id="countItems">0</strong></span>
-          <span class="chip">Ticket medio <strong id="avgSale">R$ 0,00</strong></span>
-        </div>
-      </aside>
     </section>
 
-    <section class="panel dashboard-panel" aria-label="Dashboard de desempenho">
+    <section class="panel dashboard-panel view" data-view="home" aria-label="Dashboard de desempenho">
       <div class="dashboard-head">
         <div>
           <h2>Dashboard</h2>
@@ -856,7 +1082,28 @@
       </div>
     </section>
 
-    <section class="toolbar" aria-label="Filtros">
+    <section class="panel quick-panel view" data-view="home" aria-label="Meta mensal">
+      <div class="dashboard-head">
+        <h2>Meta Mensal</h2>
+        <strong id="goalPercent" style="color: var(--green);">0%</strong>
+      </div>
+      <div style="height: 12px; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,0.06);">
+        <div id="goalBar" style="height: 100%; width: 0%; background: var(--green);"></div>
+      </div>
+      <div class="mini-grid">
+        <span class="chip">Realizado <strong id="goalDone">R$ 0,00</strong></span>
+        <span class="chip">Meta <strong id="goalValue">R$ 0,00</strong></span>
+      </div>
+    </section>
+
+    <section class="view" data-view="home">
+      <div class="section-title">
+        <h2>Produtos Parados</h2>
+      </div>
+      <div class="panel quick-panel" id="stoppedProducts"></div>
+    </section>
+
+    <section class="toolbar view" data-view="stock" aria-label="Filtros" hidden>
       <div class="field">
         <label for="searchInput">Buscar</label>
         <input class="control" id="searchInput" type="search" placeholder="iPhone, Samsung, notebook..." />
@@ -886,7 +1133,7 @@
       <button class="btn" id="seedBtn">↻ Exemplo</button>
     </section>
 
-    <section>
+    <section class="view" data-view="stock" hidden>
       <div class="section-title">
         <div>
           <h2>Estoque</h2>
@@ -898,7 +1145,73 @@
         Nenhum produto encontrado. Cadastre um produto novo para comecar o giro.
       </div>
     </section>
+
+    <section class="view" data-view="sales" hidden>
+      <div class="section-title"><h2>Vendas</h2></div>
+      <div class="panel table-panel"><table class="data-table" id="salesTable"></table></div>
+    </section>
+
+    <section class="view" data-view="capital" hidden>
+      <div class="module-grid">
+        <article class="panel module-card"><h2>Capital em estoque</h2><p id="capitalStock">R$ 0,00</p></article>
+        <article class="panel module-card"><h2>Capital realizado</h2><p id="capitalRealized">R$ 0,00</p></article>
+        <article class="panel module-card"><h2>Ticket medio</h2><p id="avgSale">R$ 0,00</p></article>
+      </div>
+    </section>
+
+    <section class="view" data-view="calculator" hidden>
+      <div class="panel quick-panel">
+        <h2>Calculadora de lucro</h2>
+        <div class="form-grid">
+          <div class="field"><label for="calcCost">Investido</label><input class="control calc-input" id="calcCost" type="number" value="2000"></div>
+          <div class="field"><label for="calcSale">Venda</label><input class="control calc-input" id="calcSale" type="number" value="2500"></div>
+          <div class="field"><label for="calcFees">Taxas/frete</label><input class="control calc-input" id="calcFees" type="number" value="80"></div>
+          <div class="field"><label for="calcHours">Horas</label><input class="control calc-input" id="calcHours" type="number" value="1"></div>
+        </div>
+        <div class="calc-result" id="calcResult">Lucro: R$ 420,00</div>
+      </div>
+    </section>
+
+    <section class="view" data-view="suppliers" hidden>
+      <div class="section-title"><h2>Fornecedores</h2></div>
+      <div class="panel table-panel"><table class="data-table" id="supplierTable"></table></div>
+    </section>
+
+    <section class="view" data-view="clients" hidden>
+      <div class="section-title"><h2>Clientes</h2></div>
+      <div class="panel table-panel"><table class="data-table" id="clientTable"></table></div>
+    </section>
+
+    <section class="view" data-view="warranty" hidden>
+      <div class="section-title"><h2>Garantias</h2></div>
+      <div class="panel table-panel"><table class="data-table" id="warrantyTable"></table></div>
+    </section>
+
+    <section class="view" data-view="reports" hidden>
+      <div class="module-grid">
+        <article class="panel module-card"><h2>Exportar JSON</h2><p>Backup completo dos produtos.</p><button class="btn" onclick="exportData()">Exportar</button></article>
+        <article class="panel module-card"><h2>Exportar CSV</h2><p>Relatorio para planilha.</p><button class="btn" onclick="exportCsv()">Exportar CSV</button></article>
+        <article class="panel module-card"><h2>Copiar relatorio</h2><p>Resumo pronto para WhatsApp.</p><button class="btn" onclick="copyReport()">Copiar</button></article>
+      </div>
+    </section>
+
+    <section class="view" data-view="finance" hidden>
+      <div class="panel quick-panel"><h2>Financeiro</h2><p>Modulo preparado para contas a pagar, contas a receber e fluxo de caixa.</p></div>
+    </section>
+
+    <section class="view" data-view="settings" hidden>
+      <div class="panel quick-panel">
+        <h2>Configuracoes</h2>
+        <div class="field"><label for="monthlyGoalInput">Meta mensal de venda</label><input class="control" id="monthlyGoalInput" type="number" min="0" step="100"></div>
+        <button class="btn btn-primary" id="saveSettingsBtn">Salvar configuracoes</button>
+      </div>
+    </section>
+
+    <section class="view" data-view="support" hidden>
+      <div class="panel quick-panel"><h2>Suporte</h2><p>Use exportar JSON antes de trocar de celular ou limpar o navegador. O app salva os dados neste aparelho.</p></div>
+    </section>
   </main>
+  </div>
 
   <div class="modal" id="productModal" aria-hidden="true">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -1016,8 +1329,23 @@
 
   <script>
     const storageKey = "giro-app-products-v1";
+    const settingsKey = "giro-app-settings-v1";
     const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
     const day = 24 * 60 * 60 * 1000;
+    const viewTitles = {
+      home: "Visao Geral",
+      stock: "Estoque",
+      sales: "Vendas",
+      capital: "Meu Capital",
+      calculator: "Calculadora",
+      suppliers: "Fornecedores",
+      clients: "Clientes",
+      warranty: "Garantias",
+      reports: "Relatorios",
+      finance: "Financeiro",
+      settings: "Configuracoes",
+      support: "Suporte"
+    };
 
     const fallbackProducts = [
       {
@@ -1086,9 +1414,14 @@
     ];
 
     let products = loadProducts();
+    let appSettings = loadSettings();
     let selectedImage = "";
 
     const els = {
+      navItems: document.querySelectorAll("[data-view-target]"),
+      views: document.querySelectorAll("[data-view]"),
+      pageTitle: document.getElementById("pageTitle"),
+      topPeriodSelect: document.getElementById("topPeriodSelect"),
       productList: document.getElementById("productList"),
       emptyState: document.getElementById("emptyState"),
       searchInput: document.getElementById("searchInput"),
@@ -1117,6 +1450,7 @@
       notesInput: document.getElementById("notesInput"),
       imageInput: document.getElementById("imageInput"),
       importInput: document.getElementById("importInput"),
+      monthlyGoalInput: document.getElementById("monthlyGoalInput"),
       toast: document.getElementById("toast")
     };
 
@@ -1133,6 +1467,23 @@
 
     function saveProducts() {
       localStorage.setItem(storageKey, JSON.stringify(products));
+    }
+
+    function loadSettings() {
+      try {
+        return { monthlyGoal: 10000, ...(JSON.parse(localStorage.getItem(settingsKey) || "{}")) };
+      } catch {
+        return { monthlyGoal: 10000 };
+      }
+    }
+
+    function saveSettings() {
+      localStorage.setItem(settingsKey, JSON.stringify(appSettings));
+    }
+
+    function setText(id, value) {
+      const element = document.getElementById(id);
+      if (element) element.textContent = value;
     }
 
     function showToast(text) {
@@ -1254,6 +1605,103 @@
         : `<div class="dash-row"><strong>${emptyText}</strong><span>0</span></div>`;
     }
 
+    function renderTable(id, headers, rows, emptyText) {
+      const table = document.getElementById(id);
+      if (!table) return;
+      if (!rows.length) {
+        table.innerHTML = `<tbody><tr><td>${emptyText}</td></tr></tbody>`;
+        return;
+      }
+      table.innerHTML = `
+        <thead><tr>${headers.map((header) => `<th>${header}</th>`).join("")}</tr></thead>
+        <tbody>
+          ${rows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("")}
+        </tbody>
+      `;
+    }
+
+    function groupByValue(items, getter) {
+      return items.reduce((map, item) => {
+        const key = getter(item) || "Nao informado";
+        if (!map[key]) map[key] = { count: 0, revenue: 0, profit: 0 };
+        map[key].count += 1;
+        map[key].revenue += Number(item.sale) * Number(item.stock || 1);
+        map[key].profit += getProfit(item);
+        return map;
+      }, {});
+    }
+
+    function renderStoppedProducts() {
+      const stopped = products
+        .filter((product) => !isSoldLike(product))
+        .map((product) => ({ ...product, age: Math.floor((Date.now() - Number(product.createdAt)) / day) }))
+        .filter((product) => product.age >= 15)
+        .sort((a, b) => b.age - a.age)
+        .slice(0, 5);
+      const target = document.getElementById("stoppedProducts");
+      if (!target) return;
+      target.innerHTML = stopped.length
+        ? stopped.map((product) => `<div class="dash-row"><strong>${escapeHtml(product.name)}</strong><span>${product.age} dias</span></div>`).join("")
+        : `<div style="text-align:center; color: var(--muted); padding: 20px;">Tudo em ordem! Seus produtos estao girando bem.</div>`;
+    }
+
+    function renderModuleViews() {
+      const soldProducts = products.filter(isSoldLike);
+      const openProducts = products.filter((product) => !isSoldLike(product));
+      const invested = openProducts.reduce((sum, product) => sum + getTotalCost(product), 0);
+      const realized = soldProducts.reduce((sum, product) => sum + getProfit(product), 0);
+      const avg = products.length ? products.reduce((sum, product) => sum + Number(product.sale), 0) / products.length : 0;
+
+      setText("capitalStock", money.format(invested));
+      setText("capitalRealized", money.format(realized));
+      setText("avgSale", money.format(avg));
+
+      renderTable("salesTable", ["Produto", "Cliente", "Plataforma", "Venda", "Lucro", "Status"], soldProducts.map((product) => [
+        `<strong>${escapeHtml(product.name)}</strong>`,
+        escapeHtml(product.buyer || "Sem contato"),
+        escapeHtml(product.platform || "Direto"),
+        money.format(Number(product.sale)),
+        `<strong>${money.format(getProfit(product))}</strong>`,
+        getStatusLabel(product.status)
+      ]), "Nenhuma venda registrada.");
+
+      const suppliers = Object.entries(groupByValue(products, (product) => product.source));
+      renderTable("supplierTable", ["Fornecedor/origem", "Itens", "Comprado", "Lucro previsto"], suppliers.map(([name, data]) => [
+        `<strong>${escapeHtml(name)}</strong>`,
+        String(data.count),
+        money.format(data.revenue - data.profit),
+        money.format(data.profit)
+      ]), "Cadastre a origem da compra nos produtos.");
+
+      const clients = Object.entries(groupByValue(soldProducts, (product) => product.buyer));
+      renderTable("clientTable", ["Cliente", "Compras", "Total vendido", "Lucro"], clients.map(([name, data]) => [
+        `<strong>${escapeHtml(name)}</strong>`,
+        String(data.count),
+        money.format(data.revenue),
+        money.format(data.profit)
+      ]), "Nenhum cliente em vendas registradas.");
+
+      renderTable("warrantyTable", ["Produto", "Cliente", "Status", "Fim estimado"], soldProducts.map((product) => {
+        const end = new Date(Number(product.soldAt || Date.now()) + (90 * day));
+        return [
+          `<strong>${escapeHtml(product.name)}</strong>`,
+          escapeHtml(product.buyer || "Sem contato"),
+          getStatusLabel(product.status),
+          end.toLocaleDateString("pt-BR")
+        ];
+      }), "Nenhum produto vendido para acompanhar garantia.");
+    }
+
+    function renderCalculator() {
+      const cost = Number(document.getElementById("calcCost")?.value || 0);
+      const sale = Number(document.getElementById("calcSale")?.value || 0);
+      const fees = Number(document.getElementById("calcFees")?.value || 0);
+      const hours = Number(document.getElementById("calcHours")?.value || 0);
+      const profit = sale - cost - fees;
+      const hourly = hours ? profit / hours : 0;
+      setText("calcResult", `Lucro: ${money.format(profit)} | Hora: ${money.format(hourly)}`);
+    }
+
     function renderDashboard() {
       const periodProducts = getPeriodProducts();
       const revenue = periodProducts.reduce((sum, product) => sum + (Number(product.sale) * Number(product.stock || 1)), 0);
@@ -1348,21 +1796,42 @@
       const sale = stockProducts.reduce((sum, product) => sum + Number(product.sale) * Number(product.stock || 1), 0);
       const profit = stockProducts.reduce((sum, product) => sum + getProfit(product), 0);
       const realized = soldProducts.reduce((sum, product) => sum + getProfit(product), 0);
+      const soldRevenue = soldProducts.reduce((sum, product) => sum + (Number(product.sale) * Number(product.stock || 1)), 0);
+      const soldCost = soldProducts.reduce((sum, product) => sum + getTotalCost(product), 0);
+      const receivable = products.filter((product) => ["sold", "packing", "shipped"].includes(product.status)).reduce((sum, product) => sum + (Number(product.sale) * Number(product.stock || 1)), 0);
+      const roi = soldCost ? (realized / soldCost) * 100 : 0;
       const avg = products.length ? products.reduce((sum, product) => sum + Number(product.sale), 0) / products.length : 0;
 
-      document.getElementById("totalInvested").textContent = money.format(invested);
-      document.getElementById("totalSale").textContent = money.format(sale);
-      document.getElementById("totalProfit").textContent = money.format(profit);
-      document.getElementById("realizedProfit").textContent = money.format(realized);
-      document.getElementById("countStock").textContent = `${stockProducts.length} (${reservedProducts.length} res.)`;
-      document.getElementById("countSold").textContent = soldProducts.length;
-      document.getElementById("countItems").textContent = products.length;
-      document.getElementById("avgSale").textContent = money.format(avg);
+      setText("dashTotalSold", money.format(soldRevenue));
+      setText("dashSoldCount", `Venda realizada ${soldProducts.length} itens`);
+      setText("dashRoiSmall", `ROI +${roi.toFixed(2)}%`);
+      setText("totalInvested", money.format(invested));
+      setText("totalSale", money.format(sale));
+      setText("totalProfit", money.format(profit));
+      setText("realizedProfit", money.format(realized));
+      setText("receivableTotal", money.format(receivable));
+      setText("activeItems", `${stockProducts.length} Itens`);
+      setText("countStock", `${stockProducts.length} (${reservedProducts.length} res.)`);
+      setText("countSold", soldProducts.length);
+      setText("countItems", products.length);
+      setText("avgSale", money.format(avg));
+
+      const goal = Number(appSettings.monthlyGoal || 0);
+      const percent = goal ? Math.min(100, Math.round((soldRevenue / goal) * 100)) : 0;
+      setText("goalPercent", `${percent}%`);
+      setText("goalDone", money.format(soldRevenue));
+      setText("goalValue", money.format(goal));
+      const goalBar = document.getElementById("goalBar");
+      if (goalBar) goalBar.style.width = `${percent}%`;
+      if (els.monthlyGoalInput) els.monthlyGoalInput.value = goal || "";
     }
 
     function renderProducts() {
       renderSummary();
       renderDashboard();
+      renderStoppedProducts();
+      renderModuleViews();
+      renderCalculator();
       const list = getFilteredProducts();
       document.getElementById("listSubtitle").textContent = `${list.length} produto${list.length === 1 ? "" : "s"} na lista`;
       els.emptyState.classList.toggle("show", list.length === 0);
@@ -1656,6 +2125,17 @@
       reader.readAsText(file);
     }
 
+    function switchView(view) {
+      els.views.forEach((section) => {
+        section.hidden = section.dataset.view !== view;
+      });
+      els.navItems.forEach((item) => {
+        item.classList.toggle("active", item.dataset.viewTarget === view);
+      });
+      els.pageTitle.textContent = viewTitles[view] || "Giro App";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
     document.getElementById("newProductBtn").addEventListener("click", () => openModal());
     document.getElementById("closeModalBtn").addEventListener("click", closeModal);
     document.getElementById("cancelBtn").addEventListener("click", closeModal);
@@ -1664,6 +2144,18 @@
     document.getElementById("csvBtn").addEventListener("click", exportCsv);
     document.getElementById("reportBtn").addEventListener("click", copyReport);
     els.importInput.addEventListener("change", importData);
+    els.navItems.forEach((item) => item.addEventListener("click", () => switchView(item.dataset.viewTarget)));
+    els.topPeriodSelect.addEventListener("change", () => {
+      els.periodSelect.value = els.topPeriodSelect.value;
+      renderProducts();
+    });
+    document.querySelectorAll(".calc-input").forEach((input) => input.addEventListener("input", renderCalculator));
+    document.getElementById("saveSettingsBtn").addEventListener("click", () => {
+      appSettings.monthlyGoal = Number(els.monthlyGoalInput.value || 0);
+      saveSettings();
+      renderProducts();
+      showToast("Configuracoes salvas");
+    });
     document.getElementById("seedBtn").addEventListener("click", () => {
       products = fallbackProducts.map((product) => ({ ...product, id: crypto.randomUUID() }));
       saveProducts();
@@ -1674,7 +2166,10 @@
     els.imageInput.addEventListener("change", handleImage);
     els.productList.addEventListener("click", handleProductAction);
     els.searchInput.addEventListener("input", renderProducts);
-    els.periodSelect.addEventListener("change", renderProducts);
+    els.periodSelect.addEventListener("change", () => {
+      els.topPeriodSelect.value = els.periodSelect.value;
+      renderProducts();
+    });
     els.statusFilter.addEventListener("change", renderProducts);
     els.sortSelect.addEventListener("change", renderProducts);
     els.productModal.addEventListener("click", (event) => {
@@ -1686,6 +2181,7 @@
 
     saveProducts();
     renderProducts();
+    switchView("home");
   </script>
 </body>
 </html>
