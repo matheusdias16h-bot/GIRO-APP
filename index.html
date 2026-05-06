@@ -636,6 +636,8 @@
         <div class="top-actions">
           <button class="icon-btn" id="exportBtn" title="Exportar dados">⇩</button>
           <button class="icon-btn" id="importBtn" title="Importar backup">⇧</button>
+          <button class="icon-btn" id="csvBtn" title="Exportar CSV">CSV</button>
+          <button class="icon-btn" id="reportBtn" title="Copiar relatorio">☷</button>
           <button class="btn btn-primary" id="newProductBtn">＋ <span>Novo produto</span></button>
           <input id="importInput" type="file" accept="application/json" hidden />
         </div>
@@ -691,7 +693,11 @@
           <option value="all">Todos</option>
           <option value="stock">Prontos para venda</option>
           <option value="reserved">Reservados</option>
+          <option value="announced">Anunciados</option>
           <option value="sold">Vendidos</option>
+          <option value="packing">Separar/embalar</option>
+          <option value="shipped">Enviados</option>
+          <option value="delivered">Entregues</option>
         </select>
       </div>
       <div class="field">
@@ -754,8 +760,47 @@
             <input class="control" id="extraCostInput" type="number" min="0" step="0.01" placeholder="Frete, capa, taxa..." />
           </div>
           <div class="field">
+            <label for="feeInput">Taxas / comissao</label>
+            <input class="control" id="feeInput" type="number" min="0" step="0.01" placeholder="Taxa de marketplace" />
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="shippingInput">Frete / entrega</label>
+            <input class="control" id="shippingInput" type="number" min="0" step="0.01" placeholder="Motoboy, Correios..." />
+          </div>
+          <div class="field">
+            <label for="hoursInput">Horas gastas</label>
+            <input class="control" id="hoursInput" type="number" min="0" step="0.25" placeholder="Tempo de compra, limpeza..." />
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="platformInput">Plataforma</label>
+            <select class="control" id="platformInput">
+              <option value="">Direto / particular</option>
+              <option>WhatsApp</option>
+              <option>OLX</option>
+              <option>Mercado Livre</option>
+              <option>Facebook Marketplace</option>
+              <option>Instagram</option>
+              <option>Shopee</option>
+              <option>Enjoei</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="skuInput">Codigo / IMEI</label>
+            <input class="control" id="skuInput" placeholder="SKU, serial ou controle interno" />
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
             <label for="buyerInput">Cliente / contato</label>
             <input class="control" id="buyerInput" placeholder="Nome ou WhatsApp do cliente" />
+          </div>
+          <div class="field">
+            <label for="sourceInput">Origem da compra</label>
+            <input class="control" id="sourceInput" placeholder="Fornecedor, loja, particular..." />
           </div>
         </div>
         <div class="form-grid">
@@ -768,7 +813,11 @@
             <select class="control" id="statusInput">
               <option value="stock">Pronto para venda</option>
               <option value="reserved">Reservado</option>
+              <option value="announced">Anunciado</option>
               <option value="sold">Vendido</option>
+              <option value="packing">Separar/embalar</option>
+              <option value="shipped">Enviado</option>
+              <option value="delivered">Entregue</option>
             </select>
           </div>
         </div>
@@ -803,10 +852,16 @@
         category: "Celular",
         cost: 2450,
         extraCost: 0,
+        fee: 0,
+        shipping: 0,
+        hours: 1,
         sale: 2950,
         stock: 1,
         status: "stock",
+        platform: "WhatsApp",
+        sku: "IP15-128",
         buyer: "",
+        source: "Particular",
         soldAt: "",
         notes: "128GB, seminovo, pronto para anunciar.",
         image: "",
@@ -818,10 +873,16 @@
         category: "Celular",
         cost: 2000,
         extraCost: 40,
+        fee: 0,
+        shipping: 0,
+        hours: 0.75,
         sale: 2350,
         stock: 1,
-        status: "stock",
+        status: "announced",
+        platform: "OLX",
+        sku: "IP14-BR",
         buyer: "",
+        source: "Fornecedor",
         soldAt: "",
         notes: "Aparelho revisado com carregador.",
         image: "",
@@ -833,10 +894,16 @@
         category: "Celular",
         cost: 1750,
         extraCost: 30,
+        fee: 45,
+        shipping: 20,
+        hours: 1.5,
         sale: 2190,
         stock: 1,
-        status: "sold",
+        status: "delivered",
+        platform: "Mercado Livre",
+        sku: "S23-256",
         buyer: "Cliente Pix",
+        source: "Troca",
         soldAt: Date.now() - (2 * day),
         notes: "Venda finalizada no Pix.",
         image: "",
@@ -862,8 +929,14 @@
       categoryInput: document.getElementById("categoryInput"),
       costInput: document.getElementById("costInput"),
       extraCostInput: document.getElementById("extraCostInput"),
+      feeInput: document.getElementById("feeInput"),
+      shippingInput: document.getElementById("shippingInput"),
+      hoursInput: document.getElementById("hoursInput"),
       saleInput: document.getElementById("saleInput"),
+      platformInput: document.getElementById("platformInput"),
+      skuInput: document.getElementById("skuInput"),
       buyerInput: document.getElementById("buyerInput"),
+      sourceInput: document.getElementById("sourceInput"),
       stockInput: document.getElementById("stockInput"),
       statusInput: document.getElementById("statusInput"),
       notesInput: document.getElementById("notesInput"),
@@ -902,10 +975,16 @@
         category: product.category || "Produto",
         cost: Number(product.cost || 0),
         extraCost: Number(product.extraCost || 0),
+        fee: Number(product.fee || 0),
+        shipping: Number(product.shipping || 0),
+        hours: Number(product.hours || 0),
         sale: Number(product.sale || 0),
         stock: Math.max(1, Number(product.stock || 1)),
-        status: ["stock", "reserved", "sold"].includes(product.status) ? product.status : "stock",
+        status: ["stock", "reserved", "announced", "sold", "packing", "shipped", "delivered"].includes(product.status) ? product.status : "stock",
+        platform: product.platform || "",
+        sku: product.sku || "",
         buyer: product.buyer || "",
+        source: product.source || "",
         soldAt: product.soldAt || "",
         notes: product.notes || "",
         image: product.image || "",
@@ -915,8 +994,12 @@
 
     products = products.map(normalizeProduct);
 
+    function isSoldLike(product) {
+      return ["sold", "packing", "shipped", "delivered"].includes(product.status);
+    }
+
     function getTotalCost(product) {
-      return (Number(product.cost) + Number(product.extraCost || 0)) * Number(product.stock || 1);
+      return (Number(product.cost) + Number(product.extraCost || 0) + Number(product.fee || 0) + Number(product.shipping || 0)) * Number(product.stock || 1);
     }
 
     function getProfit(product) {
@@ -928,8 +1011,16 @@
       return totalSale ? Math.round((getProfit(product) / totalSale) * 100) : 0;
     }
 
+    function getHourlyProfit(product) {
+      return Number(product.hours || 0) ? getProfit(product) / Number(product.hours) : 0;
+    }
+
     function getStatusLabel(status) {
+      if (status === "delivered") return "Entregue";
+      if (status === "shipped") return "Enviado";
+      if (status === "packing") return "Separar/embalar";
       if (status === "sold") return "Vendido";
+      if (status === "announced") return "Anunciado";
       if (status === "reserved") return "Reservado";
       return "Pronto para venda";
     }
@@ -940,9 +1031,35 @@
         `Categoria: ${product.category || "Produto"}`,
         `Valor: ${money.format(Number(product.sale))}`,
         `Status: ${getStatusLabel(product.status)}`,
+        product.platform ? `Plataforma: ${product.platform}` : "",
+        product.sku ? `Codigo: ${product.sku}` : "",
         product.notes ? `Obs: ${product.notes}` : ""
       ].filter(Boolean);
       return lines.join("\n");
+    }
+
+    function makeReportText() {
+      const openProducts = products.filter((product) => !isSoldLike(product));
+      const soldProducts = products.filter(isSoldLike);
+      const invested = openProducts.reduce((sum, product) => sum + getTotalCost(product), 0);
+      const revenue = soldProducts.reduce((sum, product) => sum + (Number(product.sale) * Number(product.stock || 1)), 0);
+      const realized = soldProducts.reduce((sum, product) => sum + getProfit(product), 0);
+      const platformMap = products.reduce((map, product) => {
+        const key = product.platform || "Direto";
+        map[key] = (map[key] || 0) + 1;
+        return map;
+      }, {});
+      const platformLines = Object.entries(platformMap).map(([name, total]) => `${name}: ${total}`).join(" | ");
+      return [
+        "Relatorio GIRO APP",
+        `Itens cadastrados: ${products.length}`,
+        `Em andamento: ${openProducts.length}`,
+        `Vendidos/entregues: ${soldProducts.length}`,
+        `Investido em aberto: ${money.format(invested)}`,
+        `Receita realizada: ${money.format(revenue)}`,
+        `Lucro realizado: ${money.format(realized)}`,
+        platformLines ? `Plataformas: ${platformLines}` : ""
+      ].filter(Boolean).join("\n");
     }
 
     function getFilteredProducts() {
@@ -973,8 +1090,8 @@
     }
 
     function renderSummary() {
-      const stockProducts = products.filter((product) => product.status !== "sold");
-      const soldProducts = products.filter((product) => product.status === "sold");
+      const stockProducts = products.filter((product) => !isSoldLike(product));
+      const soldProducts = products.filter(isSoldLike);
       const reservedProducts = products.filter((product) => product.status === "reserved");
       const invested = stockProducts.reduce((sum, product) => sum + getTotalCost(product), 0);
       const sale = stockProducts.reduce((sum, product) => sum + Number(product.sale) * Number(product.stock || 1), 0);
@@ -999,7 +1116,7 @@
       els.emptyState.classList.toggle("show", list.length === 0);
       els.productList.innerHTML = list.map((product) => {
         const profit = getProfit(product);
-        const isSold = product.status === "sold";
+        const isSold = isSoldLike(product);
         const isReserved = product.status === "reserved";
         const image = product.image
           ? `<img src="${product.image}" alt="${product.name}">`
@@ -1024,14 +1141,19 @@
                 </div>
                 <div class="details">
                   <div class="detail">Margem <strong>${getMargin(product)}%</strong></div>
-                  <div class="detail">Gastos extras <strong>${money.format(Number(product.extraCost || 0))}</strong></div>
+                  <div class="detail">Lucro por hora <strong>${money.format(getHourlyProfit(product))}</strong></div>
+                  <div class="detail">Taxas + frete <strong>${money.format(Number(product.fee || 0) + Number(product.shipping || 0))}</strong></div>
+                  <div class="detail">Plataforma <strong>${escapeHtml(product.platform || "Direto")}</strong></div>
+                  <div class="detail">Codigo <strong>${escapeHtml(product.sku || "Sem codigo")}</strong></div>
                   <div class="detail">Cliente <strong>${escapeHtml(product.buyer || "Sem contato")}</strong></div>
+                  <div class="detail">Origem <strong>${escapeHtml(product.source || "Nao informada")}</strong></div>
                 </div>
               </div>
               <div class="card-actions">
                 <div class="actions-left">
                   <button class="icon-btn btn-danger" data-action="delete" data-id="${product.id}" title="Excluir">⌫</button>
                   <button class="btn" data-action="edit" data-id="${product.id}">✎ Editar</button>
+                  <button class="btn" data-action="duplicate" data-id="${product.id}">Duplicar</button>
                   <button class="btn" data-action="copy" data-id="${product.id}">Copiar anuncio</button>
                 </div>
                 <div class="actions-right">
@@ -1068,8 +1190,14 @@
       els.categoryInput.value = product?.category || "Celular";
       els.costInput.value = product?.cost || "";
       els.extraCostInput.value = product?.extraCost || "";
+      els.feeInput.value = product?.fee || "";
+      els.shippingInput.value = product?.shipping || "";
+      els.hoursInput.value = product?.hours || "";
       els.saleInput.value = product?.sale || "";
+      els.platformInput.value = product?.platform || "";
+      els.skuInput.value = product?.sku || "";
       els.buyerInput.value = product?.buyer || "";
+      els.sourceInput.value = product?.source || "";
       els.stockInput.value = product?.stock || 1;
       els.statusInput.value = product?.status || "stock";
       els.notesInput.value = product?.notes || "";
@@ -1103,13 +1231,19 @@
         category: els.categoryInput.value.trim() || "Produto",
         cost: Number(els.costInput.value || 0),
         extraCost: Number(els.extraCostInput.value || 0),
+        fee: Number(els.feeInput.value || 0),
+        shipping: Number(els.shippingInput.value || 0),
+        hours: Number(els.hoursInput.value || 0),
         sale: Number(els.saleInput.value || 0),
+        platform: els.platformInput.value.trim(),
+        sku: els.skuInput.value.trim(),
         buyer: els.buyerInput.value.trim(),
+        source: els.sourceInput.value.trim(),
         stock: Math.max(1, Number(els.stockInput.value || 1)),
         status: els.statusInput.value,
         notes: els.notesInput.value.trim(),
         image: selectedImage,
-        soldAt: els.statusInput.value === "sold" ? (existing?.soldAt || Date.now()) : "",
+        soldAt: ["sold", "packing", "shipped", "delivered"].includes(els.statusInput.value) ? (existing?.soldAt || Date.now()) : "",
         createdAt: existing?.createdAt || Date.now()
       };
 
@@ -1147,11 +1281,11 @@
       }
 
       if (button.dataset.action === "toggle") {
-        product.status = product.status === "sold" ? "stock" : "sold";
-        product.soldAt = product.status === "sold" ? Date.now() : "";
+        product.status = isSoldLike(product) ? "stock" : "sold";
+        product.soldAt = isSoldLike(product) ? Date.now() : "";
         saveProducts();
         renderProducts();
-        showToast(product.status === "sold" ? "Marcado como vendido" : "Voltou para estoque");
+        showToast(isSoldLike(product) ? "Marcado como vendido" : "Voltou para estoque");
         return;
       }
 
@@ -1167,6 +1301,23 @@
       if (button.dataset.action === "copy") {
         navigator.clipboard.writeText(makeAdText(product));
         showToast("Anuncio copiado");
+        return;
+      }
+
+      if (button.dataset.action === "duplicate") {
+        const copy = normalizeProduct({
+          ...product,
+          id: crypto.randomUUID(),
+          name: `${product.name} (copia)`,
+          status: "stock",
+          buyer: "",
+          soldAt: "",
+          createdAt: Date.now()
+        });
+        products = [copy, ...products];
+        saveProducts();
+        renderProducts();
+        showToast("Produto duplicado");
         return;
       }
 
@@ -1192,6 +1343,44 @@
       link.download = "giro-app-estoque.json";
       link.click();
       URL.revokeObjectURL(url);
+    }
+
+    function csvCell(value) {
+      return `"${String(value ?? "").replace(/"/g, '""')}"`;
+    }
+
+    function exportCsv() {
+      const headers = ["Produto", "Categoria", "Status", "Plataforma", "Codigo", "Origem", "Cliente", "Investido", "Gastos extras", "Taxas", "Frete", "Venda", "Lucro", "Margem", "Lucro por hora"];
+      const rows = products.map((product) => [
+        product.name,
+        product.category,
+        getStatusLabel(product.status),
+        product.platform || "Direto",
+        product.sku,
+        product.source,
+        product.buyer,
+        product.cost,
+        product.extraCost,
+        product.fee,
+        product.shipping,
+        product.sale,
+        getProfit(product).toFixed(2),
+        `${getMargin(product)}%`,
+        getHourlyProfit(product).toFixed(2)
+      ]);
+      const csv = [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "giro-app-relatorio.csv";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function copyReport() {
+      navigator.clipboard.writeText(makeReportText());
+      showToast("Relatorio copiado");
     }
 
     function importData(event) {
@@ -1220,6 +1409,8 @@
     document.getElementById("cancelBtn").addEventListener("click", closeModal);
     document.getElementById("exportBtn").addEventListener("click", exportData);
     document.getElementById("importBtn").addEventListener("click", () => els.importInput.click());
+    document.getElementById("csvBtn").addEventListener("click", exportCsv);
+    document.getElementById("reportBtn").addEventListener("click", copyReport);
     els.importInput.addEventListener("change", importData);
     document.getElementById("seedBtn").addEventListener("click", () => {
       products = fallbackProducts.map((product) => ({ ...product, id: crypto.randomUUID() }));
