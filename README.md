@@ -29,7 +29,7 @@ Abra o arquivo `index.html` no navegador. O app salva os dados no proprio navega
 - Painel de status do giro e plataformas.
 - Meta mensal com barra de progresso.
 - Produtos parados para identificar itens sem giro.
-- Marketplace no modo explorar, mostrando oportunidades de mercado e abrindo buscas direto no Facebook Marketplace.
+- Marketplace no modo garimpo, mostrando produtos com preco-alvo para comprar, revenda estimada, lucro, ROI e buscas diretas no Facebook Marketplace.
 - Meu Capital redesenhado com capital atual, inicial, investido, retornado e tempo medio.
 - Calculadora redesenhada como simulador de lucro com varejo/atacado, margem desejada, frete e volume mensal.
 - Resumo de investido, venda prevista, lucro previsto e lucro realizado.

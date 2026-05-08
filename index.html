@@ -1434,13 +1434,22 @@
           </select>
         </div>
         <div class="field">
+          <label for="marketplaceProfit">Lucro minimo</label>
+          <select class="control" id="marketplaceProfit">
+            <option value="0">Qualquer</option>
+            <option value="200">R$ 200+</option>
+            <option value="500" selected>R$ 500+</option>
+            <option value="1000">R$ 1.000+</option>
+          </select>
+        </div>
+        <div class="field">
           <label for="marketplaceMode">Origem</label>
           <select class="control" id="marketplaceMode">
             <option value="explore">Explorar mercado</option>
             <option value="mine">Meus anuncios salvos</option>
           </select>
         </div>
-        <button class="btn" id="copyAllAdsBtn">Copiar buscas</button>
+        <button class="btn" id="copyAllAdsBtn">Copiar garimpos</button>
       </div>
       <div class="empty" id="marketplaceEmpty">Nenhuma oportunidade encontrada.</div>
       <div class="market-grid" id="marketplaceList"></div>
@@ -1582,14 +1591,18 @@
     const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
     const day = 24 * 60 * 60 * 1000;
     const marketplaceExamples = [
-      { title: "iPhone 12 - 128GB", price: 2200, category: "Celular", seller: "Claudio Victor", location: "Belford Roxo, RJ", condition: "Usado", query: "iPhone 12 128GB" },
-      { title: "iPhone 14 128GB", price: 2340, category: "Celular", seller: "Matheus Alves", location: "Sao Bernardo, SP", condition: "Usado", query: "iPhone 14 128GB" },
-      { title: "Gran Siena 2015 1.6", price: 14800, category: "Veiculo", seller: "Anunciante", location: "Mage, RJ", condition: "Usado", query: "Gran Siena 2015" },
-      { title: "Monitor Positivo", price: 180, category: "Informatica", seller: "Rian Vieira", location: "Joao Ferreira, AL", condition: "Usado", query: "monitor positivo" },
-      { title: "Camisa Brasil Nike", price: 120, category: "Moda", seller: "Loja local", location: "Belo Horizonte, MG", condition: "Novo", query: "camisa brasil nike" },
-      { title: "Sofa retratil 3 lugares", price: 650, category: "Casa", seller: "Particular", location: "Contagem, MG", condition: "Usado", query: "sofa retratil" },
-      { title: "iPhone 15 branco", price: 3650, category: "Celular", seller: "Revendedor", location: "Sao Paulo, SP", condition: "Usado", query: "iPhone 15 branco" },
-      { title: "Notebook Dell i5", price: 1600, category: "Informatica", seller: "Marketplace", location: "Betim, MG", condition: "Usado", query: "notebook dell i5" }
+      { title: "iPhone 12 - 128GB", buyTarget: 1450, resale: 2200, category: "Celular", location: "Perto de voce", condition: "Usado", query: "iPhone 12 128GB barato urgente" },
+      { title: "iPhone 13 - 128GB", buyTarget: 1850, resale: 2700, category: "Celular", location: "Perto de voce", condition: "Usado", query: "iPhone 13 128GB abaixo do valor" },
+      { title: "iPhone 14 128GB", buyTarget: 2300, resale: 3350, category: "Celular", location: "Perto de voce", condition: "Usado", query: "iPhone 14 128GB barato" },
+      { title: "iPhone 15 branco", buyTarget: 3150, resale: 4300, category: "Celular", location: "Perto de voce", condition: "Usado", query: "iPhone 15 branco urgente" },
+      { title: "Samsung S23", buyTarget: 1700, resale: 2550, category: "Celular", location: "Perto de voce", condition: "Usado", query: "Samsung S23 barato" },
+      { title: "Notebook Dell i5", buyTarget: 950, resale: 1600, category: "Informatica", location: "Perto de voce", condition: "Usado", query: "notebook Dell i5 barato" },
+      { title: "Monitor gamer 144hz", buyTarget: 450, resale: 850, category: "Informatica", location: "Perto de voce", condition: "Usado", query: "monitor gamer 144hz barato" },
+      { title: "PS4 Slim", buyTarget: 850, resale: 1350, category: "Informatica", location: "Perto de voce", condition: "Usado", query: "PS4 slim barato" },
+      { title: "Gran Siena 2015 1.6", buyTarget: 13800, resale: 17800, category: "Veiculo", location: "Perto de voce", condition: "Usado", query: "Gran Siena 2015 urgente barato" },
+      { title: "Moto Honda CG 160", buyTarget: 9800, resale: 12500, category: "Veiculo", location: "Perto de voce", condition: "Usado", query: "Honda CG 160 abaixo da tabela" },
+      { title: "Sofa retratil 3 lugares", buyTarget: 350, resale: 750, category: "Casa", location: "Perto de voce", condition: "Usado", query: "sofa retratil desapego barato" },
+      { title: "Air fryer grande", buyTarget: 120, resale: 260, category: "Casa", location: "Perto de voce", condition: "Usado", query: "air fryer barato usado" }
     ];
     const viewTitles = {
       home: "Visao Geral",
@@ -1715,6 +1728,7 @@
       marketplaceSearch: document.getElementById("marketplaceSearch"),
       marketplaceMode: document.getElementById("marketplaceMode"),
       marketplaceCategory: document.getElementById("marketplaceCategory"),
+      marketplaceProfit: document.getElementById("marketplaceProfit"),
       monthlyGoalInput: document.getElementById("monthlyGoalInput"),
       initialCapitalInput: document.getElementById("initialCapitalInput"),
       facebookCityInput: document.getElementById("facebookCityInput"),
@@ -1844,6 +1858,23 @@
 
     function getFacebookSearchUrl(query) {
       return `https://www.facebook.com/marketplace/search?query=${encodeURIComponent(String(query || "").trim())}`;
+    }
+
+    function getOpportunityProfit(item) {
+      return Number(item.resale || 0) - Number(item.buyTarget || item.price || 0);
+    }
+
+    function getOpportunityRoi(item) {
+      const buy = Number(item.buyTarget || item.price || 0);
+      return buy ? Math.round((getOpportunityProfit(item) / buy) * 100) : 0;
+    }
+
+    function getOpportunityScore(item) {
+      const profit = getOpportunityProfit(item);
+      const roi = getOpportunityRoi(item);
+      if (profit >= 1000 || roi >= 45) return "Quente";
+      if (profit >= 500 || roi >= 30) return "Bom";
+      return "Analise";
     }
 
     function makeReportText() {
@@ -2003,6 +2034,7 @@
       const term = (els.marketplaceSearch?.value || "").trim().toLowerCase();
       const mode = els.marketplaceMode?.value || "explore";
       const category = els.marketplaceCategory?.value || "all";
+      const minProfit = Number(els.marketplaceProfit?.value || 0);
       if (mode === "mine") {
         return products
           .filter((product) => {
@@ -2017,9 +2049,10 @@
           const text = `${item.title} ${item.category} ${item.seller} ${item.location}`.toLowerCase();
           const matchesTerm = !term || text.includes(term);
           const matchesCategory = category === "all" || item.category === category;
-          return matchesTerm && matchesCategory;
+          const matchesProfit = getOpportunityProfit(item) >= minProfit;
+          return matchesTerm && matchesCategory && matchesProfit;
         })
-        .sort((a, b) => Number(b.price) - Number(a.price));
+        .sort((a, b) => getOpportunityProfit(b) - getOpportunityProfit(a));
     }
 
     function renderMarketplace() {
@@ -2027,20 +2060,29 @@
       const items = getMarketplaceProducts();
       els.marketplaceEmpty.classList.toggle("show", items.length === 0);
       if (els.marketplaceMode?.value === "explore") {
-        els.marketplaceList.innerHTML = items.map((item) => `
-          <article class="panel market-card">
-            <div class="market-photo">${escapeHtml(item.title.slice(0, 1))}</div>
-            <div class="market-body">
-              <span class="status">${escapeHtml(item.condition)}</span>
-              <h3>${escapeHtml(item.title)}</h3>
-              <strong class="market-price">${money.format(Number(item.price))}</strong>
-              <div class="market-meta">${escapeHtml(item.seller)}<br>${escapeHtml(item.location)}</div>
-              <div class="card-actions" style="padding: 12px 0 0;">
-                <button class="btn btn-primary" data-market-query="${escapeHtml(item.query)}">Buscar no Facebook</button>
+        els.marketplaceList.innerHTML = items.map((item) => {
+          const profit = getOpportunityProfit(item);
+          const roi = getOpportunityRoi(item);
+          const score = getOpportunityScore(item);
+          return `
+            <article class="panel market-card">
+              <div class="market-photo">${escapeHtml(item.title.slice(0, 1))}</div>
+              <div class="market-body">
+                <span class="status ${score === "Quente" ? "reserved" : ""}">${score}</span>
+                <h3>${escapeHtml(item.title)}</h3>
+                <strong class="market-price">Comprar ate ${money.format(Number(item.buyTarget))}</strong>
+                <div class="market-meta">
+                  Revenda estimada: ${money.format(Number(item.resale))}<br>
+                  Lucro estimado: ${money.format(profit)} • ROI ${roi}%<br>
+                  ${escapeHtml(item.condition)} • ${escapeHtml(item.location)}
+                </div>
+                <div class="card-actions" style="padding: 12px 0 0;">
+                  <button class="btn btn-primary" data-market-query="${escapeHtml(item.query)}">Garimpar no Facebook</button>
+                </div>
               </div>
-            </div>
-          </article>
-        `).join("");
+            </article>
+          `;
+        }).join("");
         return;
       }
       els.marketplaceList.innerHTML = items.map((product) => {
@@ -2583,15 +2625,21 @@
     document.getElementById("reportBtn").addEventListener("click", copyReport);
     document.getElementById("openFacebookBtn").addEventListener("click", () => window.open(getFacebookMarketplaceUrl(), "_blank", "noopener"));
     document.getElementById("copyAllAdsBtn").addEventListener("click", () => {
-      const text = getMarketplaceProducts().map((item) => item.query || item.name || item.title).join("\n");
+      const text = getMarketplaceProducts().map((item) => {
+        if (item.buyTarget) {
+          return `${item.title} | comprar ate ${money.format(item.buyTarget)} | revender ~${money.format(item.resale)} | lucro ~${money.format(getOpportunityProfit(item))} | busca: ${item.query}`;
+        }
+        return item.query || item.name || item.title;
+      }).join("\n");
       navigator.clipboard.writeText(text || "Nenhuma busca encontrada");
-      showToast("Buscas copiadas");
+      showToast("Garimpos copiados");
     });
     els.importInput.addEventListener("change", importData);
     els.marketplaceList.addEventListener("click", handleMarketplaceAction);
     els.marketplaceSearch.addEventListener("input", renderMarketplace);
     els.marketplaceMode.addEventListener("change", renderMarketplace);
     els.marketplaceCategory.addEventListener("change", renderMarketplace);
+    els.marketplaceProfit.addEventListener("change", renderMarketplace);
     els.navItems.forEach((item) => item.addEventListener("click", () => switchView(item.dataset.viewTarget)));
     document.querySelectorAll("[data-view-jump]").forEach((item) => item.addEventListener("click", () => switchView(item.dataset.viewJump)));
     els.topPeriodSelect.addEventListener("change", () => {
