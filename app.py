@@ -1,6 +1,7 @@
 import json
 import os
 import sqlite3
+from datetime import datetime, timezone
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -47,7 +48,14 @@ def get_state():
     settings = DEFAULT_SETTINGS.copy()
     if settings_row:
         settings.update(json.loads(settings_row["payload"]))
-    return {"products": products, "settings": settings}
+    updated_row = None
+    with db_connection() as conn:
+        updated_row = conn.execute("SELECT payload FROM app_state WHERE key = 'updated_at'").fetchone()
+    return {
+        "products": products,
+        "settings": settings,
+        "updatedAt": json.loads(updated_row["payload"]) if updated_row else None,
+    }
 
 
 def save_state(payload):
@@ -65,7 +73,12 @@ def save_state(payload):
             "INSERT OR REPLACE INTO app_state (key, payload) VALUES ('settings', ?)",
             (json.dumps(settings, ensure_ascii=False),),
         )
-    return {"products": products, "settings": settings}
+        updated_at = datetime.now(timezone.utc).isoformat()
+        conn.execute(
+            "INSERT OR REPLACE INTO app_state (key, payload) VALUES ('updated_at', ?)",
+            (json.dumps(updated_at),),
+        )
+    return {"products": products, "settings": settings, "updatedAt": updated_at}
 
 
 class AppHandler(BaseHTTPRequestHandler):

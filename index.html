@@ -1463,6 +1463,15 @@
         <div class="field"><label for="facebookCityInput">Cidade padrao do Facebook Marketplace</label><input class="control" id="facebookCityInput" placeholder="Ex: Belo Horizonte, MG"></div>
         <button class="btn btn-primary" id="saveSettingsBtn">Salvar configuracoes</button>
       </div>
+      <div class="panel quick-panel" style="margin-top: 14px;">
+        <h2>Sincronizacao</h2>
+        <p id="syncStatus" style="color: var(--muted); margin: 0;">Verificando servidor...</p>
+        <div class="form-actions" style="justify-content: flex-start; flex-wrap: wrap;">
+          <button class="btn btn-primary" id="pullServerBtn">Baixar dados do servidor</button>
+          <button class="btn" id="pushServerBtn">Enviar este aparelho</button>
+          <button class="btn btn-danger" id="resetLocalBtn">Resetar este aparelho</button>
+        </div>
+      </div>
     </section>
 
     <section class="view" data-view="support" hidden>
@@ -1733,6 +1742,7 @@
       monthlyGoalInput: document.getElementById("monthlyGoalInput"),
       initialCapitalInput: document.getElementById("initialCapitalInput"),
       facebookCityInput: document.getElementById("facebookCityInput"),
+      syncStatus: document.getElementById("syncStatus"),
       toast: document.getElementById("toast")
     };
 
@@ -1766,52 +1776,99 @@
     }
 
     let syncTimer = null;
+    async function postStateToServer() {
+      const response = await fetch(apiDataUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ products, settings: appSettings })
+      });
+      if (!response.ok) throw new Error("Falha ao salvar no servidor");
+      setSyncStatus(`Servidor atualizado: ${new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`);
+      return response.json();
+    }
+
     function syncToServer() {
       window.clearTimeout(syncTimer);
       syncTimer = window.setTimeout(async () => {
         try {
-          await fetch(apiDataUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ products, settings: appSettings })
-          });
+          await postStateToServer();
         } catch {
+          setSyncStatus("Servidor indisponivel. Dados salvos apenas neste aparelho.");
           showToast("Modo offline: salvo neste aparelho");
         }
       }, 250);
     }
 
+    async function getStateFromServer() {
+      const response = await fetch(apiDataUrl, { cache: "no-store" });
+      if (!response.ok) throw new Error("API indisponivel");
+      return response.json();
+    }
+
+    function applyServerState(data) {
+      products = Array.isArray(data.products) ? data.products.map(normalizeProduct) : [];
+      appSettings = { ...appSettings, ...(data.settings || {}) };
+      localStorage.setItem(storageKey, JSON.stringify(products));
+      localStorage.setItem(settingsKey, JSON.stringify(appSettings));
+      renderProducts();
+      setSyncStatus(`Dados baixados do servidor: ${new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`);
+    }
+
     async function syncFromServer() {
       try {
-        const response = await fetch(apiDataUrl, { cache: "no-store" });
-        if (!response.ok) throw new Error("API indisponivel");
-        const data = await response.json();
+        const data = await getStateFromServer();
         const serverProducts = Array.isArray(data.products) ? data.products.map(normalizeProduct) : [];
         const localProducts = products.map(normalizeProduct);
         if (serverProducts.length) {
-          products = serverProducts;
-          appSettings = { ...appSettings, ...(data.settings || {}) };
-          localStorage.setItem(storageKey, JSON.stringify(products));
-          localStorage.setItem(settingsKey, JSON.stringify(appSettings));
-          renderProducts();
+          applyServerState(data);
           return;
         }
         if (localProducts.length) {
           products = localProducts;
-          await fetch(apiDataUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ products, settings: appSettings })
-          });
+          await postStateToServer();
         }
       } catch {
+        setSyncStatus("Nao foi possivel conectar ao servidor. Usando dados deste aparelho.");
         showToast("Usando dados deste aparelho");
       }
+    }
+
+    async function forcePullServer() {
+      try {
+        applyServerState(await getStateFromServer());
+        showToast("Dados do servidor baixados");
+      } catch {
+        setSyncStatus("Nao consegui baixar do servidor.");
+        showToast("Servidor indisponivel");
+      }
+    }
+
+    async function forcePushServer() {
+      try {
+        await postStateToServer();
+        showToast("Este aparelho enviou os dados");
+      } catch {
+        setSyncStatus("Nao consegui enviar para o servidor.");
+        showToast("Servidor indisponivel");
+      }
+    }
+
+    async function resetLocalAndPull() {
+      if (!confirm("Apagar os dados deste aparelho e baixar o que esta no servidor?")) return;
+      localStorage.removeItem(storageKey);
+      localStorage.removeItem(settingsKey);
+      products = [];
+      appSettings = loadSettings();
+      await forcePullServer();
     }
 
     function setText(id, value) {
       const element = document.getElementById(id);
       if (element) element.textContent = value;
+    }
+
+    function setSyncStatus(text) {
+      if (els.syncStatus) els.syncStatus.textContent = text;
     }
 
     function showToast(text) {
@@ -2724,6 +2781,9 @@
       renderProducts();
       showToast("Configuracoes salvas");
     });
+    document.getElementById("pullServerBtn").addEventListener("click", forcePullServer);
+    document.getElementById("pushServerBtn").addEventListener("click", forcePushServer);
+    document.getElementById("resetLocalBtn").addEventListener("click", resetLocalAndPull);
     document.getElementById("seedBtn").addEventListener("click", () => {
       products = fallbackProducts.map((product) => ({ ...product, id: crypto.randomUUID() }));
       saveProducts();
