@@ -1,10 +1,6 @@
 services:
   - type: web
     name: giro-app
-    runtime: static
+    runtime: python
     buildCommand: ""
-    staticPublishPath: .
-    headers:
-      - path: /*
-        name: Cache-Control
-        value: no-cache
+    startCommand: python app.py

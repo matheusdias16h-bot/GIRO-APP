@@ -1588,6 +1588,7 @@
   <script>
     const storageKey = "giro-app-products-v1";
     const settingsKey = "giro-app-settings-v1";
+    const apiDataUrl = "/api/data";
     const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
     const day = 24 * 60 * 60 * 1000;
     const marketplaceExamples = [
@@ -1748,6 +1749,7 @@
 
     function saveProducts() {
       localStorage.setItem(storageKey, JSON.stringify(products));
+      syncToServer();
     }
 
     function loadSettings() {
@@ -1760,6 +1762,51 @@
 
     function saveSettings() {
       localStorage.setItem(settingsKey, JSON.stringify(appSettings));
+      syncToServer();
+    }
+
+    let syncTimer = null;
+    function syncToServer() {
+      window.clearTimeout(syncTimer);
+      syncTimer = window.setTimeout(async () => {
+        try {
+          await fetch(apiDataUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ products, settings: appSettings })
+          });
+        } catch {
+          showToast("Modo offline: salvo neste aparelho");
+        }
+      }, 250);
+    }
+
+    async function syncFromServer() {
+      try {
+        const response = await fetch(apiDataUrl, { cache: "no-store" });
+        if (!response.ok) throw new Error("API indisponivel");
+        const data = await response.json();
+        const serverProducts = Array.isArray(data.products) ? data.products.map(normalizeProduct) : [];
+        const localProducts = products.map(normalizeProduct);
+        if (serverProducts.length) {
+          products = serverProducts;
+          appSettings = { ...appSettings, ...(data.settings || {}) };
+          localStorage.setItem(storageKey, JSON.stringify(products));
+          localStorage.setItem(settingsKey, JSON.stringify(appSettings));
+          renderProducts();
+          return;
+        }
+        if (localProducts.length) {
+          products = localProducts;
+          await fetch(apiDataUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ products, settings: appSettings })
+          });
+        }
+      } catch {
+        showToast("Usando dados deste aparelho");
+      }
     }
 
     function setText(id, value) {
@@ -2700,9 +2747,13 @@
       if (event.key === "Escape" && els.productModal.classList.contains("show")) closeModal();
     });
 
-    saveProducts();
-    renderProducts();
-    switchView("home");
+    async function initializeApp() {
+      renderProducts();
+      switchView("home");
+      await syncFromServer();
+    }
+
+    initializeApp();
   </script>
 </body>
 </html>

@@ -4,7 +4,15 @@ Sistema web simples para controlar estoque, investimento, preco de venda, lucro 
 
 ## Como usar
 
-Abra o arquivo `index.html` no navegador. O app salva os dados no proprio navegador usando `localStorage`.
+Rode o servidor com:
+
+```powershell
+python app.py
+```
+
+Depois acesse `http://127.0.0.1:8000`.
+
+No Render, o app usa SQLite no servidor e sincroniza PC e celular pela rota `/api/data`. O navegador ainda guarda uma copia local de seguranca caso a internet falhe.
 
 ## Funcoes
 
@@ -37,11 +45,12 @@ Abra o arquivo `index.html` no navegador. O app salva os dados no proprio navega
 - Exportacao de relatorio CSV.
 - Copia de relatorio geral para enviar no WhatsApp ou salvar.
 - Importacao de backup JSON.
+- Sincronizacao online entre aparelhos usando API + SQLite.
 
-## Publicar no GitHub Pages
+## Publicar no Render
 
-1. Abra as configuracoes do repositorio.
-2. Entre em `Pages`.
-3. Em `Deploy from a branch`, selecione a branch `main`.
-4. Escolha a pasta `/root`.
-5. Salve e aguarde o link ficar disponivel.
+O `render.yaml` ja esta configurado para rodar:
+
+```text
+python app.py
+```
