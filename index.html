@@ -1465,12 +1465,7 @@
       </div>
       <div class="panel quick-panel" style="margin-top: 14px;">
         <h2>Sincronizacao</h2>
-        <p id="syncStatus" style="color: var(--muted); margin: 0;">Verificando servidor...</p>
-        <div class="form-actions" style="justify-content: flex-start; flex-wrap: wrap;">
-          <button class="btn btn-primary" id="pullServerBtn">Baixar dados do servidor</button>
-          <button class="btn" id="pushServerBtn">Enviar este aparelho</button>
-          <button class="btn btn-danger" id="resetLocalBtn">Resetar este aparelho</button>
-        </div>
+        <p id="syncStatus" style="color: var(--muted); margin: 0;">Sincronizacao automatica ativa...</p>
       </div>
     </section>
 
@@ -1699,6 +1694,7 @@
     let products = loadProducts();
     let appSettings = loadSettings();
     let selectedImage = "";
+    let lastServerUpdatedAt = "";
 
     const els = {
       navItems: document.querySelectorAll("[data-view-target]"),
@@ -1783,8 +1779,10 @@
         body: JSON.stringify({ products, settings: appSettings })
       });
       if (!response.ok) throw new Error("Falha ao salvar no servidor");
+      const data = await response.json();
+      lastServerUpdatedAt = data.updatedAt || new Date().toISOString();
       setSyncStatus(`Servidor atualizado: ${new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`);
-      return response.json();
+      return data;
     }
 
     function syncToServer() {
@@ -1808,6 +1806,7 @@
     function applyServerState(data) {
       products = Array.isArray(data.products) ? data.products.map(normalizeProduct) : [];
       appSettings = { ...appSettings, ...(data.settings || {}) };
+      lastServerUpdatedAt = data.updatedAt || lastServerUpdatedAt;
       localStorage.setItem(storageKey, JSON.stringify(products));
       localStorage.setItem(settingsKey, JSON.stringify(appSettings));
       renderProducts();
@@ -1819,47 +1818,26 @@
         const data = await getStateFromServer();
         const serverProducts = Array.isArray(data.products) ? data.products.map(normalizeProduct) : [];
         const localProducts = products.map(normalizeProduct);
-        if (serverProducts.length) {
+        const serverUpdatedAt = data.updatedAt || "";
+        const hasNewServerState = serverUpdatedAt && serverUpdatedAt !== lastServerUpdatedAt;
+        if (hasNewServerState) {
           applyServerState(data);
+          return;
+        }
+        if (serverUpdatedAt || serverProducts.length) {
+          setSyncStatus("Sincronizacao automatica ativa.");
           return;
         }
         if (localProducts.length) {
           products = localProducts;
           await postStateToServer();
+          return;
         }
+        setSyncStatus("Sincronizacao automatica ativa.");
       } catch {
         setSyncStatus("Nao foi possivel conectar ao servidor. Usando dados deste aparelho.");
         showToast("Usando dados deste aparelho");
       }
-    }
-
-    async function forcePullServer() {
-      try {
-        applyServerState(await getStateFromServer());
-        showToast("Dados do servidor baixados");
-      } catch {
-        setSyncStatus("Nao consegui baixar do servidor.");
-        showToast("Servidor indisponivel");
-      }
-    }
-
-    async function forcePushServer() {
-      try {
-        await postStateToServer();
-        showToast("Este aparelho enviou os dados");
-      } catch {
-        setSyncStatus("Nao consegui enviar para o servidor.");
-        showToast("Servidor indisponivel");
-      }
-    }
-
-    async function resetLocalAndPull() {
-      if (!confirm("Apagar os dados deste aparelho e baixar o que esta no servidor?")) return;
-      localStorage.removeItem(storageKey);
-      localStorage.removeItem(settingsKey);
-      products = [];
-      appSettings = loadSettings();
-      await forcePullServer();
     }
 
     function setText(id, value) {
@@ -2781,9 +2759,6 @@
       renderProducts();
       showToast("Configuracoes salvas");
     });
-    document.getElementById("pullServerBtn").addEventListener("click", forcePullServer);
-    document.getElementById("pushServerBtn").addEventListener("click", forcePushServer);
-    document.getElementById("resetLocalBtn").addEventListener("click", resetLocalAndPull);
     document.getElementById("seedBtn").addEventListener("click", () => {
       products = fallbackProducts.map((product) => ({ ...product, id: crypto.randomUUID() }));
       saveProducts();
@@ -2806,11 +2781,13 @@
     window.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && els.productModal.classList.contains("show")) closeModal();
     });
+    window.addEventListener("focus", syncFromServer);
 
     async function initializeApp() {
       renderProducts();
       switchView("home");
       await syncFromServer();
+      window.setInterval(syncFromServer, 15000);
     }
 
     initializeApp();
