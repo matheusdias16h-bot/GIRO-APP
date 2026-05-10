@@ -1744,13 +1744,24 @@
 
     function loadProducts() {
       const raw = localStorage.getItem(storageKey);
-      if (!raw) return fallbackProducts;
+      if (!raw) return [];
       try {
         const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : fallbackProducts;
+        if (!Array.isArray(parsed)) return [];
+        if (isDemoInventory(parsed)) {
+          localStorage.removeItem(storageKey);
+          return [];
+        }
+        return parsed;
       } catch {
-        return fallbackProducts;
+        return [];
       }
+    }
+
+    function isDemoInventory(items) {
+      if (!Array.isArray(items) || !items.length || items.length > fallbackProducts.length) return false;
+      const demoKeys = new Set(fallbackProducts.map((item) => `${item.name}|${item.sku}|${item.notes}`));
+      return items.every((item) => demoKeys.has(`${item.name}|${item.sku}|${item.notes}`));
     }
 
     function saveProducts() {
